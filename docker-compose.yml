@@ -172,6 +172,25 @@ services:
       - '${DOCKER_DIR}/tautulli:/config'
     image: hotio/tautulli:latest
 
+  # kitana - plex plugin middleware (frontend)
+  kitana:
+    container_name: kitana
+    hostname: kitana
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    links:
+      - plex
+    command: -B 0.0.0.0:31337 -p /kitana -P
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/kitana:/app/data'
+    image: pannal/kitana:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
