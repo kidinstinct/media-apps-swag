@@ -165,7 +165,6 @@ services:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-      - UMASK_SET=022
       - UMASK=022
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
@@ -190,6 +189,24 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/kitana:/app/data'
     image: pannal/kitana:latest
+
+  # sabnzbd - usenet downloader python (easynews)
+  sabnzbd:
+    container_name: sabnzbd
+    hostname: sabnzbd
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/sabnzbd:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/sabnzbd:latest
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
