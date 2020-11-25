@@ -4,6 +4,8 @@ services:
   # MANAGEMENT
   #-----------------------------------------------------------------------------
 
+  # swag - reverse proxy with letsencrypt built in
+  # Docs: https://github.com/linuxserver/docker-swag
   swag:
     container_name: swag
     hostname: swag
@@ -129,6 +131,7 @@ services:
   #-----------------------------------------------------------------------------
 
   # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
   plex:
     container_name: plex
     hostname: plex
@@ -155,6 +158,7 @@ services:
     image: hotio/plex:autoscan
 
   # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
   tautulli:
     container_name: tautulli
     hostname: tautulli
@@ -172,6 +176,7 @@ services:
     image: hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
+  # Docs: https://github.com/pannal/Kitana
   kitana:
     container_name: kitana
     hostname: kitana
@@ -191,6 +196,7 @@ services:
     image: pannal/kitana:latest
 
   # sabnzbd - usenet downloader written in python (easynews)
+  # Docs: https://hotio.dev/containers/sabnzbd/
   sabnzbd:
     container_name: sabnzbd
     hostname: sabnzbd
@@ -209,6 +215,7 @@ services:
     image: hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
+  # Docs: https://hotio.dev/containers/nzbget/
   nzbget:
     container_name: nzbget
     hostname: nzbget
@@ -225,6 +232,42 @@ services:
       - '${DOCKER_DIR}/nzbget:/config'
       - '${DATA_DIR}:/data'
     image: hotio/nzbget:latest
+
+  # qbittorrent - torrent download client with VPN built in
+  # Docs: https://github.com/binhex/arch-qbittorrentvpn
+  # Read the documentaton on proper setup of either wireguard or openvpn
+  # This template is setup for wireguard
+  qbittorrent:
+    container_name: qbittorrent
+    hostname: qbittorrent
+    restart: unless-stopped
+    privileged: true
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      # change below subnet to whatever you configure your docker network to
+      - LAN_NETWORK=172.20.0.0/16
+      - VPN_ENABLED=yes
+      - VPN_PROV=pia
+      # options below are openvpn or wireguard (I like wireguard)
+      - VPN_CLIENT=wireguard
+      - STRICT_PORT_FORWARD=yes
+      - ENABLE_PRIVOXY=no
+      - DEBUG=yes
+      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
+      - VPN_USER=${PIA_USERNAME}
+      - VPN_PASS=${PIA_PASSWORD}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/qbittorrent:/config'
+      - '${DATA_DIR}:/data'
+    image: 'binhex/arch-qbittorrentvpn:latest'
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
