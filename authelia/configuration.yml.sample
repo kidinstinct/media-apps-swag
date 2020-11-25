@@ -53,8 +53,6 @@ access_control:
     default_policy: deny
     rules:
         # Rules applied to everyone
-        # - domain: authelia.YOUR_DOMAIN
-        # policy: bypass
         #    - domain: radarr.example.com
         #      policy: bypass
         #      subject: "group:admins"
