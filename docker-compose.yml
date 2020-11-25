@@ -1,0 +1,529 @@
+version: '3.3'
+services:
+  #-----------------------------------------------------------------------------
+  # MANAGEMENT
+  #-----------------------------------------------------------------------------
+
+  # portainer - container management frontend
+  # - view logs
+  # - restart containers
+  # - connect to container shell (if available)
+  # - see configuration
+  portainer:
+    container_name: portainer
+    hostname: portainer
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '${DOCKER_DIR}/portainer:/data'
+    depends_on:
+      - traefik
+    image: portainer/portainer-ce:latest
+
+  # redis - session database (more performance)
+  authredis:
+    container_name: authredis
+    hostname: authredis
+    restart: unless-stopped
+    networks:
+      apps: {}
+    volumes:
+      - ${DOCKER_DIR}/authredis:/bitnami/redis/data
+      - ./authelia/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    secrets:
+      - redis
+    command: /opt/bitnami/scripts/redis/run.sh --requirepass ${REDIS_PASSWORD}
+    image: bitnami/redis:latest
+
+  # mariadb - used for authelia storage
+  authmariadb:
+    container_name: authmariadb
+    hostname: authmariadb
+    restart: unless-stopped
+    networks:
+      apps: {}
+    env_file: ${DOCKER_DIR}/authmariadb/authmariadb-env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+    volumes:
+      - ${DOCKER_DIR}/authmariadb:/config
+    image: linuxserver/mariadb:latest
+
+  # Authelia - Self-Hosted Single Sign-On and Two-Factor Authentication
+  authelia:
+    container_name: authelia
+    hostname: authelia
+    restart: unless-stopped
+    networks:
+      apps: {}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - ./authelia/configuration.yml:/config/configuration.yml:ro
+      - ${DOCKER_DIR}/authelia:/config
+    environment:
+      - 'TZ=America/New_York'
+      - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
+      - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
+      - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/mysql
+      - AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE=/run/secrets/smtp
+      - AUTHELIA_DUO_API_SECRET_KEY_FILE=/run/secrets/duo
+      - AUTHELIA_SESSION_REDIS_PASSWORD_FILE=/run/secrets/redis
+      - AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE=/run/secrets/postgress
+      - AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD_FILE=/run/secrets/ldap
+    secrets:
+      - jwt
+      - session
+      - mysql
+      - smtp
+      - duo
+      - redis
+      - postgress
+      - ldap
+    depends_on:
+      - traefik
+      - authmariadb
+      - authredis
+    # image: authelia/authelia:latest
+    image: authelia/authelia:4.21.0
+
+  #-----------------------------------------------------------------------------
+  # MEDIA
+  #-----------------------------------------------------------------------------
+
+  # plex - media server
+  plex:
+    container_name: plex
+    hostname: plex
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - '32400:32400/tcp'
+    environment:
+      - TZ=America/New_York
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    env_file: '${DOCKER_DIR}/plex/plex-env'
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/plex:/config'
+      - '${DOCKER_DIR}/plex-transcode:/transcode'
+      - '${TV_DIR}:/TV'
+      - '${MOVIES_DIR}:/Movies'
+      - '${MUSIC_DIR}:/Music'
+    depends_on:
+      - traefik
+    image: hotio/plex:autoscan
+
+  # tautulli - plex monitor
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/tautulli:/config'
+      - '${DOCKER_DIR}/tautulli/plex-logs:/logs'
+    depends_on:
+      - traefik
+    image: linuxserver/tautulli:latest
+
+  # kitana - plex plugin middleware (frontend)
+  kitana:
+    container_name: kitana
+    hostname: kitana
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - '31337:31337'
+    environment:
+      - TZ=America/New_York
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    image: pannal/kitana:latest
+
+  # sabnzbd - usenet downloader python (easynews)
+  sabnzbd:
+    container_name: sabnzbd
+    hostname: sabnzbd
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/sabnzbd:/config'
+      - '${DL_DIR}:/downloads'
+    depends_on:
+      - traefik
+    image: linuxserver/sabnzbd:latest
+
+  # transmission-openvpn - openvpn compatible torrent client (configured for PrivateVPN)
+  transmission:
+    container_name: transmission
+    hostname: transmission
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - CREATE_TUN_DEVICE=true
+      - TRANSMISSION_UMASK=2
+      - PUID=${PUID}
+      - PGID=${PGID}
+    env_file: '${DOCKER_DIR}/transmission-openvpn/transmission-env'
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/transmission-openvpn:/config'
+      - '${DOCKER_DIR}/transmission-openvpn/resolv.conf:/etc/resolv.conf:ro'
+      - '${DL_DIR}:/downloads'
+      - /dev/net/tun:/dev/net/tun
+    depends_on:
+      - traefik
+    command:
+      - dumb-init
+      - /etc/openvpn/start.sh
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    image: haugene/transmission-openvpn:latest
+
+  # jackett - nzb torsnab proxy
+  # used to aggregate torrent indexers to use with nzbhydra, sonarr and others
+  jackett:
+    container_name: jackett
+    hostname: jackett
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DL_DIR}/torrent-queue:/downloads'
+      - '${DOCKER_DIR}/jackett:/config'
+    image: linuxserver/jackett:development
+
+  # nzbhydra2 - usenet and torsnab indexer proxy
+  nzbhydra2:
+    container_name: nzbhydra2
+    hostname: nzbhydra2
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/nzbhydra:/config'
+      - '${DL_DIR}:/downloads'
+    depends_on:
+      - traefik
+    image: linuxserver/nzbhydra2:dev
+
+  # bazarr - automatic download subtitles
+  bazarr:
+    container_name: bazarr
+    hostname: bazarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/bazarr:/config'
+      - '${TV_DIR}:/TV'
+      - '${MOVIES_DIR}:/Movies'
+    depends_on:
+      - traefik
+    image: linuxserver/bazarr:latest
+
+  # sonarr - TV Shows
+  sonarr:
+    container_name: sonarr
+    hostname: sonarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/sonarr:/config'
+      - '${DL_DIR}/tv:/downloads'
+      - '${TV_DIR}:/TV'
+    depends_on:
+      - traefik
+    image: linuxserver/sonarr:preview
+
+  # radarr - Movies
+  radarr:
+    container_name: radarr
+    hostname: radarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/radarr:/config'
+      - '${DL_DIR}/movies:/downloads'
+      - '${MOVIES_DIR}:/Movies'
+    depends_on:
+      - traefik
+    image: linuxserver/radarr:nightly
+
+  # lidarr - Music
+  lidarr:
+    container_name: lidarr
+    hostname: lidarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/lidarr:/config'
+      - '${DL_DIR}/music:/downloads'
+      - '${MUSIC_DIR}:/Music'
+    depends_on:
+      - traefik
+    image: linuxserver/lidarr:nightly
+
+  # readarr - eBooks
+  readarr:
+    container_name: readarr
+    hostname: readarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/readarr:/config'
+      - '${EBOOK_DIR}:/Books'
+      - '${AUDIOBOOK_DIR}:/Audiobooks'
+      - '${DL_DIR}/books:/downloads'
+    depends_on:
+      - traefik
+    image: hotio/readarr:nightly
+
+  # lazylibrarian - eBooks and Audiobooks (using only for audiobooks)
+  lazylib:
+    container_name: lazylib
+    hostname: lazylib
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/lazylib:/config'
+      - '${EBOOK_DIR}:/Books'
+      - '${AUDIOBOOK_DIR}:/Audiobooks'
+      - '${DL_DIR}/lazylib:/downloads'
+    depends_on:
+      - traefik
+    image: linuxserver/lazylibrarian:latest
+
+  # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
+  ombi:
+    container_name: ombi
+    hostname: ombi
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - BASE_URL=/ombi
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/ombi:/config'
+    depends_on:
+      - traefik
+    image: linuxserver/ombi:latest
+
+  # calibre - ebook management database
+  calibre:
+    container_name: calibre
+    hostname: calibre
+    restart: unless-stopped
+    networks:
+      apps: {}
+    env_file: '${DOCKER_DIR}/calibre/calibre-env'
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/calibre:/config'
+      - '${DL_DIR}/books:/downloads'
+      - '${EBOOK_DIR}:/Books'
+    depends_on:
+      - traefik
+    image: linuxserver/calibre:latest
+
+  # calibre-web - web frontend for calibre
+  calibre-web:
+    container_name: calibre-web
+    hostname: calibre-web
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=America/New_York
+      - UMASK_SET=022
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DOCKER_MODS=linuxserver/calibre-web:calibre
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/calibre-web:/config'
+      - '${EBOOK_DIR}:/Books'
+    depends_on:
+      - traefik
+    image: linuxserver/calibre-web:latest
+
+  # organizr - WebApp portal for bookmarks, prevents multiple tabs
+  # mostly used for sonarr and the like
+  organizr:
+    container_name: organizr
+    hostname: organizr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/New_York
+      - fpm=true
+      - branch=v2-develop
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/organizr:/config'
+    depends_on:
+      - traefik
+    image: organizr/organizr:latest
+
+  # --------------------------------------------------------------------------
+
+  # whoami - simple service that returns PC information from where it was accessed.
+  # this is being used to keep apex domain alive
+  whoami:
+    container_name: whoami
+    hostname: whoami
+    networks:
+      apps: {}
+    environment:
+      - 'TZ=America/New_York'
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    depends_on:
+      - traefik
+    image: traefik/whoami
+
+networks:
+  apps:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+secrets:
+  jwt:
+    file: ${SECRETS_DIR}/jwt
+  session:
+    file: ${SECRETS_DIR}/session
+  mysql:
+    file: ${SECRETS_DIR}/mysql
+  smtp:
+    file: ${SECRETS_DIR}/smtp
+  duo:
+    file: ${SECRETS_DIR}/duo
+  redis:
+    file: ${SECRETS_DIR}/redis
+  postgress:
+    file: ${SECRETS_DIR}/postgress
+  ldap:
+    file: ${SECRETS_DIR}/ldap
+  authmariadb_root_password:
+    file: ${SECRETS_DIR}/authmariadb_root_password
