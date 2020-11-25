@@ -9,5 +9,13 @@ Requires to edit the `$DOCKER_DIR/sabnzbd/app/sabnzbd.ini` file to whitelist the
 Pick your favorite editor and edit the following line in that file.
 
 ```ini
-host_whitelist = sabnzbd, <YOURDOMAIN-HERE.COM>
+host_whitelist = sabnzbd, <YOURDOMAIN.COM>
 ```
+
+Access sabnzbd at `https://<yourdomain.com>/sabnzbd`
+
+## NZBGet
+
+The default credentials for nzbget are user: **nzbget** password: **tegbzn6789**
+
+Access nzbget at `https://<yourdomain.com>/nzbget`

@@ -190,7 +190,7 @@ services:
       - '${DOCKER_DIR}/kitana:/app/data'
     image: pannal/kitana:latest
 
-  # sabnzbd - usenet downloader python (easynews)
+  # sabnzbd - usenet downloader written in python (easynews)
   sabnzbd:
     container_name: sabnzbd
     hostname: sabnzbd
@@ -207,6 +207,24 @@ services:
       - '${DOCKER_DIR}/sabnzbd:/config'
       - '${DATA_DIR}:/data'
     image: hotio/sabnzbd:latest
+
+  # nzbget - usenet downloader written in C++ (easynews)
+  nzbget:
+    container_name: nzbget
+    hostname: nzbget
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/nzbget:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/nzbget:latest
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
