@@ -306,6 +306,25 @@ services:
       - '${DATA_DIR}:/data'
     image: 'binhex/arch-delugevpn:latest'
 
+  # jackett - nzb torsnab proxy
+  # used to aggregate torrent indexers to use with nzbhydra, sonarr and others
+  # Docs: https://hotio.dev/containers/jackett/
+  jackett:
+    container_name: jackett
+    hostname: jackett
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/jackett:/config'
+      - '${DATA_DIR}/downloads/torrents/queue:/downloads'
+    image: hotio/jackett:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
