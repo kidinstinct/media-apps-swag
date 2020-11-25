@@ -154,6 +154,24 @@ services:
       - '${DATA_DIR}/Media/Music:/Music'
     image: hotio/plex:autoscan
 
+  # tautulli - plex monitor
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK_SET=022
+      - UMASK=022
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/tautulli:/config'
+    image: hotio/tautulli:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
