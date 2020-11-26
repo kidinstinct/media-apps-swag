@@ -477,9 +477,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/radarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/radarr:/config'
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/radarr:nightly
 
   # radarr - Movies
@@ -496,9 +496,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/radarr-4k:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/radarr-4k:/config
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/radarr:nightly
 
   # lidarr - Music
@@ -515,9 +515,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/lidarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/lidarr:/config
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - music:/Music
@@ -537,9 +537,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/readarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/readarr:/config
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
@@ -559,9 +559,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/mylar3:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/mylar3:/config
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
       - mylarTempDownloads:/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
@@ -582,9 +582,9 @@ services:
       - PGID=${PGID}
       - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
     volumes:
-      - '${DOCKER_DIR}/lazylib:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/lazylib:/config
+      - nfsData:/data
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
@@ -620,9 +620,9 @@ services:
       - GUAC_USER=${GUAC_USER}
       - GUAC_PASS=${GUAC_PASS}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/calibre:/config'
-      - '${DATA_DIR}:/data'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/calibre:/config
+      - nfsMedia:/Media
     image: linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
@@ -640,9 +640,9 @@ services:
       - PGID=${PGID}
       - DOCKER_MODS=linuxserver/calibre-web:calibre
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/calibre-web:/config'
-      - '${DATA_DIR}/media/Books/eBooks:/Books'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/calibre-web:/config
+      - nfsMedia:/Media
     image: linuxserver/calibre-web:latest
 
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
@@ -735,9 +735,10 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/unpackerr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - /etc/localtime:/etc/localtime:ro
+      - unpackerrConfig:/config
+      - nfsData:/data
+      - downloads:/data/downloads
     image: hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
@@ -750,7 +751,7 @@ services:
     environment:
       - 'TZ=${TZ}'
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
+      - /etc/localtime:/etc/localtime:ro
     image: traefik/whoami
 
 networks:
@@ -761,16 +762,32 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
+  # LOCAL Mounts
+  unpackerrConfig:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${DOCKER_DIR}/unpackerr
+  downloads:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${LOCAL_DL_DIR}
+
+  # NFS Mounts
   nfsData:
     driver_opts:
-      type: 'nfs'
-      o: 'addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw'
-      device: ':/volume1/data'
+      type: nfs
+      o: addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw
+      device: :/volume1/data
   nfsMedia:
     driver_opts:
-      type: 'nfs'
-      o: 'addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw'
-      device: ':/volume1/data/media'
+      type: nfs
+      o: addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw
+      device: :/volume1/data/media
+
   # Temp Volumes
   books:
   music:
