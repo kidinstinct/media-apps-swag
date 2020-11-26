@@ -478,7 +478,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - ${DOCKER_DIR}/radarr:/config'
+      - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
       - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/radarr:nightly
