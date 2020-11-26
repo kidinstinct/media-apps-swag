@@ -401,10 +401,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/bazarr:/config'
-      - '${DATA_DIR}/media/TV:/TV'
-      - '${DATA_DIR}/media/TV:/Movies'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/bazarr:/config
+      - nfsMedia:/Media
     image: hotio/bazarr:nightly
 
   # bazarr - automatic download subtitles
@@ -421,10 +420,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/bazarr-4k:/config'
-      - '${DATA_DIR}/media/TV-4K:/TV-4K'
-      - '${DATA_DIR}/media/TV-4K:/Movies-4K'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/bazarr-4k:/config
+      - nfsMedia:/Media
     image: hotio/bazarr:nightly
 
   # sonarr - TV Shows
@@ -441,10 +439,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/sonarr:/config'
-      # - '${DATA_DIR}:/data'
+      - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/sonarr:nightly
 
   # sonarr - TV Shows
@@ -461,9 +458,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/sonarr-4k:/config'
-      # - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/sonarr-4k:/config
+      - ${LOCAL_DL_DIR}:/data/downloads
       - nfsData:/data
     image: hotio/sonarr:nightly
 
