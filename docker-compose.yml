@@ -465,6 +465,42 @@ services:
       - '${DATA_DIR}:/data'
     image: hotio/sonarr:nightly
 
+  # radarr - Movies
+  # Docs: https://hotio.dev/containers/radarr/
+  radarr:
+    container_name: radarr
+    hostname: radarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/radarr:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/radarr:nightly
+
+  # radarr - Movies
+  # Docs: https://hotio.dev/containers/radarr/
+  radarr-4k:
+    container_name: radarr-4k
+    hostname: radarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/radarr-4k:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/radarr:nightly
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
