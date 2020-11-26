@@ -1,0 +1,13 @@
+{
+  "cSpell.ignoreWords": [
+    "noatime",
+    "nocopy",
+    "nolock",
+    "rsize",
+    "rsize wsize tcp noatime nolock soft rw",
+    "rw",
+    "soft",
+    "tcp",
+    "wsize"
+  ]
+}
