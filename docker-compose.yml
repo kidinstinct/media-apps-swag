@@ -28,6 +28,7 @@ services:
       - EMAIL=${ACME_EMAIL}
       - ONLY_SUBDOMAINS=false
       - STAGING=false
+      - MAXMINDDB_LICENSE_KEY=${MAXMINDDB_LICENSE_KEY}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/swag:/config'
