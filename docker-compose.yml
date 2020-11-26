@@ -525,6 +525,9 @@ services:
       - '${DOCKER_DIR}/lidarr:/config'
       - '${DATA_DIR}:/data'
       - '${LOCAL_DL_DIR}:/data/downloads'
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
+      - music:/Music
     image: hotio/lidarr:nightly
 
   # readarr - eBooks
@@ -544,6 +547,9 @@ services:
       - '${DOCKER_DIR}/readarr:/config'
       - '${DATA_DIR}:/data'
       - '${LOCAL_DL_DIR}:/data/downloads'
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
+      - books:/Books
     image: hotio/readarr:nightly
 
   # mylar3 - Comics
@@ -563,6 +569,9 @@ services:
       - '${DOCKER_DIR}/mylar3:/config'
       - '${DATA_DIR}:/data'
       - '${LOCAL_DL_DIR}:/data/downloads'
+      - mylarTempDownloads:/downloads
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
     image: hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
@@ -757,6 +766,11 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+
+volumes:
+  books:
+  music:
+  mylarTempDownloads:
 
 secrets:
   jwt:
