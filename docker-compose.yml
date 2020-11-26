@@ -260,7 +260,7 @@ services:
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
       - ENABLE_PRIVOXY=no
-      - DEBUG=yes
+      - DEBUG=no
       - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
@@ -296,7 +296,7 @@ services:
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
       - ENABLE_PRIVOXY=no
-      - DEBUG=yes
+      - DEBUG=no
       - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
@@ -322,8 +322,28 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/jackett:/config'
-      - '${DATA_DIR}/downloads/torrents/queue:/downloads'
+      - '${DATA_DIR}/downloads/torrents/queue:/torrents'
     image: hotio/jackett:latest
+
+  # nzbhydra2 - usenet and torsnab indexer proxy
+  # Docs: https://hotio.dev/containers/nzbhydra2/
+  nzbhydra2:
+    container_name: nzbhydra2
+    hostname: nzbhydra2
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/nzbhydra2:/config'
+      - '${DATA_DIR}/downloads/torrents:/torrents'
+      - '${DATA_DIR}/downloads/nzb:/nzb'
+    image: hotio/nzbhydra2:testing
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
