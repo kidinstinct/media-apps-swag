@@ -537,6 +537,43 @@ services:
       - '${DATA_DIR}:/data'
     image: hotio/readarr:nightly
 
+  # mylar3 - Comics
+  # Docs: https://hotio.dev/containers/mylar3/
+  mylar3:
+    container_name: mylar3
+    hostname: mylar3
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/mylar3:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/mylar3:nightly
+
+  # lazylib - eBooks and Audiobooks
+  # Docs: https://hub.docker.com/r/linuxserver/lazylibrarian
+  lazylib:
+    container_name: lazylib
+    hostname: lazylib
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
+    volumes:
+      - '${DOCKER_DIR}/lazylib:/config'
+      - '${DATA_DIR}:/data'
+    image: linuxserver/lazylibrarian:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
