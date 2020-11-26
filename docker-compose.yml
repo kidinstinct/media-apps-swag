@@ -152,9 +152,35 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/plex:/config'
       - '${DOCKER_DIR}/plex-transcode:/transcode'
-      - '${DATA_DIR}/Media/TV:/TV'
-      - '${DATA_DIR}/Media/Movies:/Movies'
-      - '${DATA_DIR}/Media/Music:/Music'
+      - '${DATA_DIR}/media/TV:/TV'
+      - '${DATA_DIR}/media/Movies:/Movies'
+      - '${DATA_DIR}/media/Music:/Music'
+    image: hotio/plex:autoscan
+
+  # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
+  plex-4k:
+    container_name: plex-4k
+    hostname: plex-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - '32401:32400/tcp'
+    environment:
+      - TZ=${TZ}
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/plex-4k:/config'
+      - '${DOCKER_DIR}/plex-4k-transcode:/transcode'
+      - '${DATA_DIR}/media/TV-4K:/TV-4K'
+      - '${DATA_DIR}/media/Movies-4K:/Movies-4K'
     image: hotio/plex:autoscan
 
   # tautulli - plex monitor
@@ -173,6 +199,24 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/tautulli:/config'
+    image: hotio/tautulli:latest
+
+  # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
+  tautulli-4k:
+    container_name: tautulli-4k
+    hostname: tautulli-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=022
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/tautulli-4k:/config'
     image: hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
