@@ -252,10 +252,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/sabnzbd:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/sabnzbd:/config
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
@@ -272,10 +271,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/nzbget:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/nzbget:/config
+      - ${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
@@ -310,11 +308,10 @@ services:
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/qbittorrent:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: 'binhex/arch-qbittorrentvpn:latest'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/qbittorrent:/config
+      - ${LOCAL_DL_DIR}:/data/downloads
+    image: binhex/arch-qbittorrentvpn:latest
 
   # deluge - torrent download client with VPN built in
   # Docs: https://github.com/binhex/arch-delugevpn
@@ -347,11 +344,10 @@ services:
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/deluge:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: 'binhex/arch-delugevpn:latest'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/deluge:/config
+      - ${LOCAL_DL_DIR}:/data/downloads
+    image: binhex/arch-delugevpn:latest
 
   # jackett - nzb torsnab proxy
   # used to aggregate torrent indexers to use with nzbhydra, sonarr and others
