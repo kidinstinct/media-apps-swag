@@ -149,12 +149,10 @@ services:
       - PLEX_CLAIM=${PLEX_CLAIM}
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/plex:/config'
-      - '${DOCKER_DIR}/plex-transcode:/transcode'
-      - '${DATA_DIR}/media/TV:/TV'
-      - '${DATA_DIR}/media/Movies:/Movies'
-      - '${DATA_DIR}/media/Music:/Music'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex:/config
+      - ${DOCKER_DIR}/plex-transcode:/transcode
+      - nfsMedia:/Media
     image: hotio/plex:autoscan
 
   # plex - media server
@@ -447,7 +445,8 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/sonarr:/config'
-      - '${DATA_DIR}:/data'
+      # - '${DATA_DIR}:/data'
+      - nfsData:/data
       - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/sonarr:nightly
 
@@ -466,8 +465,9 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/sonarr-4k:/config'
-      - '${DATA_DIR}:/data'
+      # - '${DATA_DIR}:/data'
       - '${LOCAL_DL_DIR}:/data/downloads'
+      - nfsData:/data
     image: hotio/sonarr:nightly
 
   # radarr - Movies
@@ -768,6 +768,17 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
+  nfsData:
+    driver_opts:
+      type: 'nfs'
+      o: 'addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw'
+      device: ':/volume1/data'
+  nfsMedia:
+    driver_opts:
+      type: 'nfs'
+      o: 'addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw'
+      device: ':/volume1/data/media'
+  # Temp Volumes
   books:
   music:
   mylarTempDownloads:
