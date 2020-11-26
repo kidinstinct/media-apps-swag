@@ -255,7 +255,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/sabnzbd:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
@@ -274,7 +274,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbget:/config
-      - ${LOCAL_DL_DIR}:/data/downloads'
+      - downloads:/data/downloads'
     image: hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
@@ -311,7 +311,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/qbittorrent:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: binhex/arch-qbittorrentvpn:latest
 
   # deluge - torrent download client with VPN built in
@@ -347,7 +347,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/deluge:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: binhex/arch-delugevpn:latest
 
   # jackett - nzb torsnab proxy
@@ -365,8 +365,8 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/jackett:/config'
-      - '${LOCAL_DL_DIR}/torrents/queue:/torrents'
+      - ${DOCKER_DIR}/jackett:/config
+      - downloads:/data/downloads
     image: hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
@@ -385,7 +385,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbhydra2:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
@@ -442,7 +442,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: hotio/sonarr:nightly
 
   # sonarr - TV Shows
@@ -460,7 +460,7 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/sonarr-4k:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
       - nfsData:/data
     image: hotio/sonarr:nightly
 
@@ -480,7 +480,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: hotio/radarr:nightly
 
   # radarr - Movies
@@ -499,7 +499,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/radarr-4k:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: hotio/radarr:nightly
 
   # lidarr - Music
@@ -540,7 +540,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/readarr:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
@@ -562,7 +562,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
       - mylarTempDownloads:/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
@@ -585,7 +585,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lazylib:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
     image: linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
@@ -764,18 +764,6 @@ networks:
 
 volumes:
   # LOCAL Mounts
-  swagConfig:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ${DOCKER_DIR}/swag
-  unpackerrConfig:
-    driver: local
-    driver_opts:
-      o: bind
-      type: none
-      device: ${DOCKER_DIR}/unpackerr
   downloads:
     driver: local
     driver_opts:

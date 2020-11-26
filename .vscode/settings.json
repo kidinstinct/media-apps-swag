@@ -1,13 +1,22 @@
 {
   "cSpell.ignoreWords": [
+    "ghcr",
+    "key",
+    "license",
+    "maxminddb",
+    "maxminddb license key",
     "noatime",
     "nocopy",
     "nolock",
+    "port",
     "rsize",
     "rsize wsize tcp noatime nolock soft rw",
     "rw",
     "soft",
+    "sysctls",
     "tcp",
+    "webui",
+    "webui port",
     "wsize"
   ]
 }
