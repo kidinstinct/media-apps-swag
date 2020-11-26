@@ -153,7 +153,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/plex:/config
       - ${DOCKER_DIR}/plex-transcode:/transcode
-      - nfsMedia:/Media
+      - nfsData:/data
     image: hotio/plex:autoscan
 
   # plex - media server
@@ -178,8 +178,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/plex-4k:/config
       - ${DOCKER_DIR}/plex-4k-transcode:/transcode
-      - ${DATA_DIR}/media/TV-4K:/TV-4K
-      - ${DATA_DIR}/media/Movies-4K:/Movies-4K
+      - nfsData:/data
     image: hotio/plex:autoscan
 
   # tautulli - plex monitor
@@ -404,7 +403,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/bazarr:/config
-      - nfsMedia:/Media
+      - nfsData:/data
     image: hotio/bazarr:nightly
 
   # bazarr - automatic download subtitles
@@ -423,7 +422,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/bazarr-4k:/config
-      - nfsMedia:/Media
+      - nfsData:/data
     image: hotio/bazarr:nightly
 
   # sonarr - TV Shows
@@ -623,7 +622,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre:/config
-      - nfsMedia:/Media
+      - nfsData:/data
     image: linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
@@ -643,7 +642,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre-web:/config
-      - nfsMedia:/Media
+      - nfsData:/data
     image: linuxserver/calibre-web:latest
 
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
@@ -777,11 +776,6 @@ volumes:
       type: nfs
       o: addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw
       device: :/volume1/data
-  nfsMedia:
-    driver_opts:
-      type: nfs
-      o: addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw
-      device: :/volume1/data/media
 
   # Temp Volumes
   books:
