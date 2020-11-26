@@ -429,6 +429,42 @@ services:
       - '${DATA_DIR}/media/TV-4K:/Movies-4K'
     image: hotio/bazarr:nightly
 
+  # sonarr - TV Shows
+  # Docs: https://hotio.dev/containers/sonarr/
+  sonarr:
+    container_name: sonarr
+    hostname: sonarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/sonarr:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/sonarr:nightly
+
+  # sonarr - TV Shows
+  # Docs: https://hotio.dev/containers/sonarr/
+  sonarr-4k:
+    container_name: sonarr-4k
+    hostname: sonarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/sonarr-4k:/config'
+      - '${DATA_DIR}:/data'
+    image: hotio/sonarr:nightly
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
