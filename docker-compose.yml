@@ -652,6 +652,60 @@ services:
       - '${DOCKER_DIR}/organizr:/config'
     image: organizr/organizr:latest
 
+  # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
+  # Docs: https://hotio.dev/containers/trackarr/
+  trackarr:
+    container_name: trackarr
+    hostname: trackarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/trackarr:/config'
+    image: hotio/trackarr:nightly
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr:
+    container_name: requestrr
+    hostname: requestrr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/requestrr:/config'
+    image: hotio/requestrr:latest
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr-4k:
+    container_name: requestrr-4k
+    hostname: requestrr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/requestrr-4k:/config'
+    image: hotio/requestrr:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
