@@ -4,28 +4,34 @@ services:
   # MANAGEMENT
   #-----------------------------------------------------------------------------
 
-  # portainer - container management frontend
-  # - view logs
-  # - restart containers
-  # - connect to container shell (if available)
-  # - see configuration
-  portainer:
-    container_name: portainer
-    hostname: portainer
+  # swag - reverse proxy with letsencrypt built in
+  # Docs: https://github.com/linuxserver/docker-swag
+  swag:
+    container_name: swag
+    hostname: swag
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
     networks:
       apps: {}
+    ports:
+      - 80:80
+      - 443:443
     environment:
-      - TZ=America/New_York
+      - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
+      - URL=${DOMAIN_NAME}
+      - SUBDOMAINS=wildcard
+      - DNSPLUGIN=${DNS_PLUGIN}
+      - VALIDATION=dns
+      - EMAIL=${ACME_EMAIL}
+      - ONLY_SUBDOMAINS=false
+      - STAGING=false
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - '${DOCKER_DIR}/portainer:/data'
-    depends_on:
-      - traefik
-    image: portainer/portainer-ce:latest
+      - '${DOCKER_DIR}/swag:/config'
+    image: linuxserver/swag:latest
 
   # redis - session database (more performance)
   authredis:
@@ -36,11 +42,11 @@ services:
       apps: {}
     volumes:
       - ${DOCKER_DIR}/authredis:/bitnami/redis/data
-      - ./authelia/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
+      - ${DOCKER_DIR}/authredis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     secrets:
       - redis
@@ -54,13 +60,16 @@ services:
     restart: unless-stopped
     networks:
       apps: {}
-    env_file: ${DOCKER_DIR}/authmariadb/authmariadb-env
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - UMASK_SET=022
       - UMASK=022
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=authelia
+      - MYSQL_USER=authelia
     volumes:
       - ${DOCKER_DIR}/authmariadb:/config
     image: linuxserver/mariadb:latest
@@ -74,10 +83,9 @@ services:
       apps: {}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
-      - ./authelia/configuration.yml:/config/configuration.yml:ro
       - ${DOCKER_DIR}/authelia:/config
     environment:
-      - 'TZ=America/New_York'
+      - 'TZ=${TZ}'
       - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
       - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
       - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/mysql
@@ -95,18 +103,35 @@ services:
       - redis
       - postgress
       - ldap
-    depends_on:
-      - traefik
-      - authmariadb
-      - authredis
-    # image: authelia/authelia:latest
     image: authelia/authelia:4.21.0
+
+  # portainer - container management frontend
+  # - view logs
+  # - restart containers
+  # - connect to container shell (if available)
+  # - see configuration
+  portainer:
+    container_name: portainer
+    hostname: portainer
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '${DOCKER_DIR}/portainer:/data'
+    image: portainer/portainer-ce:latest
 
   #-----------------------------------------------------------------------------
   # MEDIA
   #-----------------------------------------------------------------------------
 
   # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
   plex:
     container_name: plex
     hostname: plex
@@ -116,24 +141,50 @@ services:
     ports:
       - '32400:32400/tcp'
     environment:
-      - TZ=America/New_York
+      - TZ=${TZ}
       - PLEX_UID=${PUID}
       - PLEX_GID=${PGID}
       - PUID=${PUID}
       - PGID=${PGID}
-    env_file: '${DOCKER_DIR}/plex/plex-env'
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/plex:/config'
       - '${DOCKER_DIR}/plex-transcode:/transcode'
-      - '${TV_DIR}:/TV'
-      - '${MOVIES_DIR}:/Movies'
-      - '${MUSIC_DIR}:/Music'
-    depends_on:
-      - traefik
+      - '${DATA_DIR}/media/TV:/TV'
+      - '${DATA_DIR}/media/Movies:/Movies'
+      - '${DATA_DIR}/media/Music:/Music'
+    image: hotio/plex:autoscan
+
+  # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
+  plex-4k:
+    container_name: plex-4k
+    hostname: plex-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - '32401:32400/tcp'
+    environment:
+      - TZ=${TZ}
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLEX_CLAIM=${PLEX_4K_CLAIM}
+      - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/plex-4k:/config'
+      - '${DOCKER_DIR}/plex-4k-transcode:/transcode'
+      - '${DATA_DIR}/media/TV-4K:/TV-4K'
+      - '${DATA_DIR}/media/Movies-4K:/Movies-4K'
     image: hotio/plex:autoscan
 
   # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
   tautulli:
     container_name: tautulli
     hostname: tautulli
@@ -141,37 +192,55 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
-      - UMASK=022
+      - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
+      - UMASK=022
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/tautulli:/config'
-      - '${DOCKER_DIR}/tautulli/plex-logs:/logs'
-    depends_on:
-      - traefik
-    image: linuxserver/tautulli:latest
+    image: hotio/tautulli:latest
+
+  # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
+  tautulli-4k:
+    container_name: tautulli-4k
+    hostname: tautulli-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=022
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/tautulli-4k:/config'
+    image: hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
+  # Docs: https://github.com/pannal/Kitana
   kitana:
     container_name: kitana
     hostname: kitana
     restart: unless-stopped
     networks:
       apps: {}
-    ports:
-      - '31337:31337'
     environment:
-      - TZ=America/New_York
+      - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex
+    command: -B 0.0.0.0:31337 -p /kitana -P
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/kitana:/app/data'
     image: pannal/kitana:latest
 
-  # sabnzbd - usenet downloader python (easynews)
+  # sabnzbd - usenet downloader written in python (easynews)
+  # Docs: https://hotio.dev/containers/sabnzbd/
   sabnzbd:
     container_name: sabnzbd
     hostname: sabnzbd
@@ -179,54 +248,115 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/sabnzbd:/config'
-      - '${DL_DIR}:/downloads'
-    depends_on:
-      - traefik
-    image: linuxserver/sabnzbd:latest
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/sabnzbd:latest
 
-  # transmission-openvpn - openvpn compatible torrent client (configured for PrivateVPN)
-  transmission:
-    container_name: transmission
-    hostname: transmission
+  # nzbget - usenet downloader written in C++ (easynews)
+  # Docs: https://hotio.dev/containers/nzbget/
+  nzbget:
+    container_name: nzbget
+    hostname: nzbget
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - CREATE_TUN_DEVICE=true
-      - TRANSMISSION_UMASK=2
+      - TZ=${TZ}
+      - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    env_file: '${DOCKER_DIR}/transmission-openvpn/transmission-env'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/transmission-openvpn:/config'
-      - '${DOCKER_DIR}/transmission-openvpn/resolv.conf:/etc/resolv.conf:ro'
-      - '${DL_DIR}:/downloads'
-      - /dev/net/tun:/dev/net/tun
-    depends_on:
-      - traefik
-    command:
-      - dumb-init
-      - /etc/openvpn/start.sh
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-    image: haugene/transmission-openvpn:latest
+      - '${DOCKER_DIR}/nzbget:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/nzbget:latest
+
+  # qbittorrent - torrent download client with VPN built in
+  # Docs: https://github.com/binhex/arch-qbittorrentvpn
+  # Read the documentaton on proper setup of either wireguard or openvpn
+  # This template is setup for wireguard
+  qbittorrent:
+    container_name: qbittorrent
+    hostname: qbittorrent
+    restart: unless-stopped
+    privileged: true
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      # change below subnet to whatever you configure your docker network to
+      - LAN_NETWORK=172.20.0.0/16
+      - WEBUI_PORT=8080
+      - VPN_ENABLED=yes
+      - VPN_PROV=pia
+      # options below are openvpn or wireguard (I like wireguard)
+      - VPN_CLIENT=wireguard
+      - STRICT_PORT_FORWARD=yes
+      - ENABLE_PRIVOXY=no
+      - DEBUG=no
+      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
+      - VPN_USER=${PIA_USERNAME}
+      - VPN_PASS=${PIA_PASSWORD}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/qbittorrent:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: 'binhex/arch-qbittorrentvpn:latest'
+
+  # deluge - torrent download client with VPN built in
+  # Docs: https://github.com/binhex/arch-delugevpn
+  # Read the documentaton on proper setup of either wireguard or openvpn
+  # This template is setup for wireguard
+  deluge:
+    container_name: deluge
+    hostname: deluge
+    restart: unless-stopped
+    privileged: true
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      # change below subnet to whatever you configure your docker network to
+      - LAN_NETWORK=172.20.0.0/16
+      - VPN_ENABLED=yes
+      - VPN_PROV=pia
+      # options below are openvpn or wireguard (I like wireguard)
+      - VPN_CLIENT=wireguard
+      - STRICT_PORT_FORWARD=yes
+      - ENABLE_PRIVOXY=no
+      - DEBUG=no
+      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
+      - VPN_USER=${PIA_USERNAME}
+      - VPN_PASS=${PIA_PASSWORD}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/deluge:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: 'binhex/arch-delugevpn:latest'
 
   # jackett - nzb torsnab proxy
   # used to aggregate torrent indexers to use with nzbhydra, sonarr and others
+  # Docs: https://hotio.dev/containers/jackett/
   jackett:
     container_name: jackett
     hostname: jackett
@@ -234,17 +364,17 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DL_DIR}/torrent-queue:/downloads'
       - '${DOCKER_DIR}/jackett:/config'
-    image: linuxserver/jackett:development
+      - '${LOCAL_DL_DIR}/torrents/queue:/torrents'
+    image: hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
+  # Docs: https://hotio.dev/containers/nzbhydra2/
   nzbhydra2:
     container_name: nzbhydra2
     hostname: nzbhydra2
@@ -252,20 +382,18 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/nzbhydra:/config'
-      - '${DL_DIR}:/downloads'
-    depends_on:
-      - traefik
-    image: linuxserver/nzbhydra2:dev
+      - '${DOCKER_DIR}/nzbhydra2:/config'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
+  # Docs: https://hotio.dev/containers/bazarr/
   bazarr:
     container_name: bazarr
     hostname: bazarr
@@ -273,21 +401,39 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/bazarr:/config'
-      - '${TV_DIR}:/TV'
-      - '${MOVIES_DIR}:/Movies'
-    depends_on:
-      - traefik
-    image: linuxserver/bazarr:latest
+      - '${DATA_DIR}/media/TV:/TV'
+      - '${DATA_DIR}/media/TV:/Movies'
+    image: hotio/bazarr:nightly
+
+  # bazarr - automatic download subtitles
+  # Docs: https://hotio.dev/containers/bazarr/
+  bazarr-4k:
+    container_name: bazarr-4k
+    hostname: bazarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/bazarr-4k:/config'
+      - '${DATA_DIR}/media/TV-4K:/TV-4K'
+      - '${DATA_DIR}/media/TV-4K:/Movies-4K'
+    image: hotio/bazarr:nightly
 
   # sonarr - TV Shows
+  # Docs: https://hotio.dev/containers/sonarr/
   sonarr:
     container_name: sonarr
     hostname: sonarr
@@ -295,20 +441,37 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/sonarr:/config'
-      - '${DL_DIR}/tv:/downloads'
-      - '${TV_DIR}:/TV'
-    depends_on:
-      - traefik
-    image: linuxserver/sonarr:preview
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/sonarr:nightly
+
+  # sonarr - TV Shows
+  # Docs: https://hotio.dev/containers/sonarr/
+  sonarr-4k:
+    container_name: sonarr-4k
+    hostname: sonarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/sonarr-4k:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/sonarr:nightly
 
   # radarr - Movies
+  # Docs: https://hotio.dev/containers/radarr/
   radarr:
     container_name: radarr
     hostname: radarr
@@ -316,21 +479,37 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/radarr:/config'
-      - '${DL_DIR}/movies:/downloads'
-      - '${MOVIES_DIR}:/Movies'
-    depends_on:
-      - traefik
-    image: linuxserver/radarr:nightly
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/radarr:nightly
+
+  # radarr - Movies
+  # Docs: https://hotio.dev/containers/radarr/
+  radarr-4k:
+    container_name: radarr-4k
+    hostname: radarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/radarr-4k:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/radarr:nightly
 
   # lidarr - Music
+  # Docs: https://hotio.dev/containers/lidarr/
   lidarr:
     container_name: lidarr
     hostname: lidarr
@@ -338,21 +517,21 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/lidarr:/config'
-      - '${DL_DIR}/music:/downloads'
-      - '${MUSIC_DIR}:/Music'
-    depends_on:
-      - traefik
-    image: linuxserver/lidarr:nightly
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
+      - music:/Music
+    image: hotio/lidarr:nightly
 
   # readarr - eBooks
+  # Docs: https://hotio.dev/containers/readarr/
   readarr:
     container_name: readarr
     hostname: readarr
@@ -360,20 +539,43 @@ services:
     networks:
       apps: {}
     environment:
+      - TZ=${TZ}
+      - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/readarr:/config'
-      - '${EBOOK_DIR}:/Books'
-      - '${AUDIOBOOK_DIR}:/Audiobooks'
-      - '${DL_DIR}/books:/downloads'
-    depends_on:
-      - traefik
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
+      - books:/Books
     image: hotio/readarr:nightly
 
-  # lazylibrarian - eBooks and Audiobooks (using only for audiobooks)
+  # mylar3 - Comics
+  # Docs: https://hotio.dev/containers/mylar3/
+  mylar3:
+    container_name: mylar3
+    hostname: mylar3
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/mylar3:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+      - mylarTempDownloads:/downloads
+      # this is temporary as there was a path restructuring and some errors came up
+      # using a docker volume (below) to map an old root directory
+    image: hotio/mylar3:nightly
+
+  # lazylib - eBooks and Audiobooks
+  # Docs: https://hub.docker.com/r/linuxserver/lazylibrarian
   lazylib:
     container_name: lazylib
     hostname: lazylib
@@ -381,23 +583,19 @@ services:
     networks:
       apps: {}
     environment:
+      - TZ=${TZ}
+      - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
-      - UMASK_SET=022
-      - UMASK=022
       - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/lazylib:/config'
-      - '${EBOOK_DIR}:/Books'
-      - '${AUDIOBOOK_DIR}:/Audiobooks'
-      - '${DL_DIR}/lazylib:/downloads'
-    depends_on:
-      - traefik
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
+  # Docs: https://hotio.dev/containers/ombi/
   ombi:
     container_name: ombi
     hostname: ombi
@@ -405,43 +603,37 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
-      - BASE_URL=/ombi
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/ombi:/config'
-    depends_on:
-      - traefik
-    image: linuxserver/ombi:latest
+    image: hotio/ombi:latest
 
   # calibre - ebook management database
+  # docs: https://hub.docker.com/r/linuxserver/calibre
   calibre:
     container_name: calibre
     hostname: calibre
     restart: unless-stopped
     networks:
       apps: {}
-    env_file: '${DOCKER_DIR}/calibre/calibre-env'
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+      - GUAC_USER=${GUAC_USER}
+      - GUAC_PASS=${GUAC_PASS}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/calibre:/config'
-      - '${DL_DIR}/books:/downloads'
-      - '${EBOOK_DIR}:/Books'
-    depends_on:
-      - traefik
+      - '${DATA_DIR}:/data'
     image: linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
+  # docs: https://hub.docker.com/r/linuxserver/calibre-web
   calibre-web:
     container_name: calibre-web
     hostname: calibre-web
@@ -449,8 +641,7 @@ services:
     networks:
       apps: {}
     environment:
-      - TZ=America/New_York
-      - UMASK_SET=022
+      - TZ=${TZ}
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
@@ -458,13 +649,12 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/calibre-web:/config'
-      - '${EBOOK_DIR}:/Books'
-    depends_on:
-      - traefik
+      - '${DATA_DIR}/media/Books/eBooks:/Books'
     image: linuxserver/calibre-web:latest
 
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
   # mostly used for sonarr and the like
+  # docs: https://hub.docker.com/r/organizr/organizr
   organizr:
     container_name: organizr
     hostname: organizr
@@ -474,17 +664,88 @@ services:
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
-      - TZ=America/New_York
+      - TZ=${TZ}
       - fpm=true
       - branch=v2-develop
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/organizr:/config'
-    depends_on:
-      - traefik
     image: organizr/organizr:latest
 
-  # --------------------------------------------------------------------------
+  # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
+  # Docs: https://hotio.dev/containers/trackarr/
+  trackarr:
+    container_name: trackarr
+    hostname: trackarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/trackarr:/config'
+    image: hotio/trackarr:nightly
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr:
+    container_name: requestrr
+    hostname: requestrr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/requestrr:/config'
+    image: hotio/requestrr:latest
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr-4k:
+    container_name: requestrr-4k
+    hostname: requestrr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/requestrr-4k:/config'
+    image: hotio/requestrr:latest
+
+  # unpackerr - This application runs as a daemon on your download host. It checks for completed
+  # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
+  # Docs: https://hotio.dev/containers/requestrr/
+  unpackerr:
+    container_name: unpackerr
+    hostname: unpackerr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/unpackerr:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
+    image: hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
@@ -494,11 +755,9 @@ services:
     networks:
       apps: {}
     environment:
-      - 'TZ=America/New_York'
+      - 'TZ=${TZ}'
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
-    depends_on:
-      - traefik
     image: traefik/whoami
 
 networks:
@@ -507,6 +766,11 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+
+volumes:
+  books:
+  music:
+  mylarTempDownloads:
 
 secrets:
   jwt:

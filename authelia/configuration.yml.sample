@@ -5,6 +5,17 @@
 host: 0.0.0.0
 port: 9091
 log_level: warn
+#
+# Configuration options specific to the internal http server
+server:
+    # Buffers usually should be configured to be the same value.
+    # Explanation at https://docs.authelia.com/configuration/server.html
+    # Read buffer size configures the http server's maximum incoming request size in bytes.
+    read_buffer_size: 4096
+    # Write buffer size configures the http server's maximum outgoing response size in bytes.
+    write_buffer_size: 4096
+    # Set the single level path Authelia listens on, must be alphanumeric chars and should not contain any slashes.
+    path: 'authelia'
 
 # This secret can also be set using the env variables AUTHELIA_JWT_SECRET_FILE
 # I used this site to generate the secret: https://www.grc.com/passwords.htm
@@ -42,8 +53,6 @@ access_control:
     default_policy: deny
     rules:
         # Rules applied to everyone
-        - domain: authelia.YOUR_DOMAIN
-          policy: bypass
         #    - domain: radarr.example.com
         #      policy: bypass
         #      subject: "group:admins"
