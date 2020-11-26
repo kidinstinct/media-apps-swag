@@ -86,7 +86,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/authelia:/config
     environment:
-      - 'TZ=${TZ}'
+      - TZ=${TZ}
       - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
       - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
       - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/mysql
@@ -140,7 +140,7 @@ services:
     networks:
       apps: {}
     ports:
-      - '32400:32400/tcp'
+      - 32400:32400/tcp
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -165,7 +165,7 @@ services:
     networks:
       apps: {}
     ports:
-      - '32401:32400/tcp'
+      - 32401:32400/tcp
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -273,7 +273,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbget:/config
-      - downloads:/data/downloads'
+      - downloads:/data/downloads
     image: hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
@@ -749,7 +749,7 @@ services:
     networks:
       apps: {}
     environment:
-      - 'TZ=${TZ}'
+      - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
     image: traefik/whoami
