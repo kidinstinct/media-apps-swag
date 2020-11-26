@@ -30,8 +30,8 @@ services:
       - STAGING=false
       - MAXMINDDB_LICENSE_KEY=${MAXMINDDB_LICENSE_KEY}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/swag:/config'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/swag:/config
     image: linuxserver/swag:latest
 
   # redis - session database (more performance)
@@ -41,14 +41,14 @@ services:
     restart: unless-stopped
     networks:
       apps: {}
-    volumes:
-      - ${DOCKER_DIR}/authredis:/bitnami/redis/data
-      - ${DOCKER_DIR}/authredis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - ${DOCKER_DIR}/authredis:/bitnami/redis/data
+      - ${DOCKER_DIR}/authredis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
     secrets:
       - redis
     command: /opt/bitnami/scripts/redis/run.sh --requirepass ${REDIS_PASSWORD}
@@ -83,7 +83,7 @@ services:
     networks:
       apps: {}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
+      - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/authelia:/config
     environment:
       - 'TZ=${TZ}'
@@ -122,9 +122,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - '${DOCKER_DIR}/portainer:/data'
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer:/data
     image: portainer/portainer-ce:latest
 
   #-----------------------------------------------------------------------------
@@ -175,11 +175,11 @@ services:
       - PLEX_CLAIM=${PLEX_4K_CLAIM}
       - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/plex-4k:/config'
-      - '${DOCKER_DIR}/plex-4k-transcode:/transcode'
-      - '${DATA_DIR}/media/TV-4K:/TV-4K'
-      - '${DATA_DIR}/media/Movies-4K:/Movies-4K'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex-4k:/config
+      - ${DOCKER_DIR}/plex-4k-transcode:/transcode
+      - ${DATA_DIR}/media/TV-4K:/TV-4K
+      - ${DATA_DIR}/media/Movies-4K:/Movies-4K
     image: hotio/plex:autoscan
 
   # tautulli - plex monitor
@@ -196,8 +196,8 @@ services:
       - PGID=${PGID}
       - UMASK=022
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/tautulli:/config'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli:/config
     image: hotio/tautulli:latest
 
   # tautulli - plex monitor
@@ -214,8 +214,8 @@ services:
       - PGID=${PGID}
       - UMASK=022
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/tautulli-4k:/config'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli-4k:/config
     image: hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
@@ -235,8 +235,8 @@ services:
       - plex-4k
     command: -B 0.0.0.0:31337 -p /kitana -P
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/kitana:/app/data'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/kitana:/app/data
     image: pannal/kitana:latest
 
   # sabnzbd - usenet downloader written in python (easynews)
@@ -383,9 +383,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/nzbhydra2:/config'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/nzbhydra2:/config
+      - ${LOCAL_DL_DIR}:/data/downloads
     image: hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
@@ -602,7 +602,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/ombi:/config'
+      - ${DOCKER_DIR}/ombi:/config
     image: hotio/ombi:latest
 
   # calibre - ebook management database
@@ -662,8 +662,8 @@ services:
       - fpm=true
       - branch=v2-develop
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/organizr:/config'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/organizr:/config
     image: organizr/organizr:latest
 
   # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
@@ -681,7 +681,7 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/trackarr:/config'
+      - ${DOCKER_DIR}/trackarr:/config
     image: hotio/trackarr:nightly
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
@@ -699,7 +699,7 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/requestrr:/config'
+      - ${DOCKER_DIR}/requestrr:/config
     image: hotio/requestrr:latest
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
@@ -717,7 +717,7 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/requestrr-4k:/config'
+      - ${DOCKER_DIR}/requestrr-4k:/config
     image: hotio/requestrr:latest
 
   # unpackerr - This application runs as a daemon on your download host. It checks for completed
@@ -737,7 +737,7 @@ services:
       - DEBUG=no
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - unpackerrConfig:/config
+      - ${DOCKER_DIR}/unpackerr:/config
       - nfsData:/data
       - downloads:/data/downloads
     image: hotio/unpackerr:nightly
@@ -764,6 +764,12 @@ networks:
 
 volumes:
   # LOCAL Mounts
+  swagConfig:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${DOCKER_DIR}/swag
   unpackerrConfig:
     driver: local
     driver_opts:
