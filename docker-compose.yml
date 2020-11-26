@@ -574,6 +574,84 @@ services:
       - '${DATA_DIR}:/data'
     image: linuxserver/lazylibrarian:latest
 
+  # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
+  # Docs: https://hotio.dev/containers/ombi/
+  ombi:
+    container_name: ombi
+    hostname: ombi
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '${DOCKER_DIR}/ombi:/config'
+    image: hotio/ombi:testing
+
+  # calibre - ebook management database
+  # docs: https://hub.docker.com/r/linuxserver/calibre
+  calibre:
+    container_name: calibre
+    hostname: calibre
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - GUAC_USER=${GUAC_USER}
+      - GUAC_PASS=${GUAC_PASS}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/calibre:/config'
+      - '${DATA_DIR}/media/Books/eBooks:/Books'
+    image: linuxserver/calibre:latest
+
+  # calibre-web - web frontend for calibre
+  # docs: https://hub.docker.com/r/linuxserver/calibre-web
+  calibre-web:
+    container_name: calibre-web
+    hostname: calibre-web
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DOCKER_MODS=linuxserver/calibre-web:calibre
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/calibre-web:/config'
+      - '${DATA_DIR}/media/Books/eBooks:/Books'
+    image: linuxserver/calibre-web:latest
+
+  # organizr - WebApp portal for bookmarks, prevents multiple tabs
+  # mostly used for sonarr and the like
+  # docs: https://hub.docker.com/r/organizr/organizr
+  organizr:
+    container_name: organizr
+    hostname: organizr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - fpm=true
+      - branch=v2-develop
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/organizr:/config'
+    image: organizr/organizr:latest
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
