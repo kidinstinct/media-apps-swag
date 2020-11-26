@@ -370,7 +370,7 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/jackett:/config'
-      - '${LOCAL_DL_DIR}/downloads/torrents/queue:/torrents'
+      - '${LOCAL_DL_DIR}/torrents/queue:/torrents'
     image: hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
@@ -389,8 +389,7 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/nzbhydra2:/config'
-      - '${LOCAL_DL_DIR}/downloads/torrents:/torrents'
-      - '${LOCAL_DL_DIR}/downloads/nzb:/nzb'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
