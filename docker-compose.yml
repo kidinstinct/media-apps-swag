@@ -256,6 +256,7 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/sabnzbd:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
@@ -275,6 +276,7 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/nzbget:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
@@ -312,6 +314,7 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/qbittorrent:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: 'binhex/arch-qbittorrentvpn:latest'
 
   # deluge - torrent download client with VPN built in
@@ -348,6 +351,7 @@ services:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/deluge:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: 'binhex/arch-delugevpn:latest'
 
   # jackett - nzb torsnab proxy
@@ -366,7 +370,7 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/jackett:/config'
-      - '${DATA_DIR}/downloads/torrents/queue:/torrents'
+      - '${LOCAL_DL_DIR}/downloads/torrents/queue:/torrents'
     image: hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
@@ -385,8 +389,8 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/nzbhydra2:/config'
-      - '${DATA_DIR}/downloads/torrents:/torrents'
-      - '${DATA_DIR}/downloads/nzb:/nzb'
+      - '${LOCAL_DL_DIR}/downloads/torrents:/torrents'
+      - '${LOCAL_DL_DIR}/downloads/nzb:/nzb'
     image: hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
@@ -445,6 +449,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/sonarr:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/sonarr:nightly
 
   # sonarr - TV Shows
@@ -463,6 +468,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/sonarr-4k:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/sonarr:nightly
 
   # radarr - Movies
@@ -481,6 +487,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/radarr:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/radarr:nightly
 
   # radarr - Movies
@@ -499,6 +506,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/radarr-4k:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/radarr:nightly
 
   # lidarr - Music
@@ -517,6 +525,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/lidarr:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/lidarr:nightly
 
   # readarr - eBooks
@@ -535,6 +544,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/readarr:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/readarr:nightly
 
   # mylar3 - Comics
@@ -553,6 +563,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/mylar3:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
@@ -572,6 +583,7 @@ services:
     volumes:
       - '${DOCKER_DIR}/lazylib:/config'
       - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
@@ -589,7 +601,7 @@ services:
       - PGID=${PGID}
     volumes:
       - '${DOCKER_DIR}/ombi:/config'
-    image: hotio/ombi:testing
+    image: hotio/ombi:latest
 
   # calibre - ebook management database
   # docs: https://hub.docker.com/r/linuxserver/calibre
@@ -609,7 +621,7 @@ services:
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/calibre:/config'
-      - '${DATA_DIR}/media/Books/eBooks:/Books'
+      - '${DATA_DIR}:/data'
     image: linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
@@ -723,6 +735,8 @@ services:
       - DEBUG=no
     volumes:
       - '${DOCKER_DIR}/unpackerr:/config'
+      - '${DATA_DIR}:/data'
+      - '${LOCAL_DL_DIR}:/data/downloads'
     image: hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
