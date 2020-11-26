@@ -173,8 +173,8 @@ services:
       - PLEX_GID=${PGID}
       - PUID=${PUID}
       - PGID=${PGID}
-      - PLEX_CLAIM=${PLEX_CLAIM}
-      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+      - PLEX_CLAIM=${PLEX_4K_CLAIM}
+      - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
       - '${DOCKER_DIR}/plex-4k:/config'
@@ -705,6 +705,25 @@ services:
     volumes:
       - '${DOCKER_DIR}/requestrr-4k:/config'
     image: hotio/requestrr:latest
+
+  # unpackerr - This application runs as a daemon on your download host. It checks for completed
+  # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
+  # Docs: https://hotio.dev/containers/requestrr/
+  unpackerr:
+    container_name: unpackerr
+    hostname: unpackerr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - '${DOCKER_DIR}/unpackerr:/config'
+    image: hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
