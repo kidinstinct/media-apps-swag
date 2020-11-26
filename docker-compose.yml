@@ -231,6 +231,7 @@ services:
       - PGID=${PGID}
     links:
       - plex
+      - plex-4k
     command: -B 0.0.0.0:31337 -p /kitana -P
     volumes:
       - '/etc/localtime:/etc/localtime:ro'
