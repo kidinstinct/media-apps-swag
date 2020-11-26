@@ -389,6 +389,46 @@ services:
       - '${DATA_DIR}/downloads/nzb:/nzb'
     image: hotio/nzbhydra2:testing
 
+  # bazarr - automatic download subtitles
+  # Docs: https://hotio.dev/containers/bazarr/
+  bazarr:
+    container_name: bazarr
+    hostname: bazarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/bazarr:/config'
+      - '${DATA_DIR}/media/TV:/TV'
+      - '${DATA_DIR}/media/TV:/Movies'
+    image: hotio/bazarr:nightly
+
+  # bazarr - automatic download subtitles
+  # Docs: https://hotio.dev/containers/bazarr/
+  bazarr-4k:
+    container_name: bazarr-4k
+    hostname: bazarr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '${DOCKER_DIR}/bazarr-4k:/config'
+      - '${DATA_DIR}/media/TV-4K:/TV-4K'
+      - '${DATA_DIR}/media/TV-4K:/Movies-4K'
+    image: hotio/bazarr:nightly
+
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
   whoami:
