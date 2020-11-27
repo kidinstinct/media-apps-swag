@@ -453,6 +453,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     depends_on:
+      - nzbhydra2
       - sabnzbd
       - nzbget
       - deluge
@@ -477,6 +478,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     depends_on:
+      - nzbhydra2
       - sabnzbd
       - nzbget
       - deluge
@@ -501,6 +503,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     depends_on:
+      - nzbhydra2
       - sabnzbd
       - nzbget
       - deluge
@@ -525,6 +528,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     depends_on:
+      - nzbhydra2
       - sabnzbd
       - nzbget
       - deluge
