@@ -38,6 +38,8 @@ services:
     image: ghcr.io/linuxserver/swag:latest
 
   # redis - session database (more performance)
+  # default run PUID is 1001 and PGID is root(0)
+  # cant' seem to change it, folder permissions need to be set accordingly
   authredis:
     container_name: authredis
     hostname: authredis
@@ -108,6 +110,9 @@ services:
       - redis
       - postgress
       - ldap
+    depends_on:
+      - authredis
+      - authmariadb
     image: authelia/authelia:4.21.0
 
   # portainer - container management frontend
