@@ -308,7 +308,7 @@ services:
       - LAN_NETWORK=172.20.0.0/16
       - WEBUI_PORT=8080
       - VPN_ENABLED=yes
-      - VPN_PROV=pia
+      - VPN_PROV=${VPN_PROV}
       # options below are openvpn or wireguard (I like wireguard)
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
@@ -344,7 +344,7 @@ services:
       # change below subnet to whatever you configure your docker network to
       - LAN_NETWORK=172.20.0.0/16
       - VPN_ENABLED=yes
-      - VPN_PROV=pia
+      - VPN_PROV=${VPN_PROV}
       # options below are openvpn or wireguard (I like wireguard)
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
