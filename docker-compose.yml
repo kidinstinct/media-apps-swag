@@ -517,7 +517,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - nfsData:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - downloads:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - music:/Music
