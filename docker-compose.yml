@@ -25,10 +25,13 @@ services:
       - SUBDOMAINS=wildcard
       - DNSPLUGIN=${DNS_PLUGIN}
       - VALIDATION=dns
-      - EMAIL=${ACME_EMAIL}
+      - FILE__EMAIL=/run/secrets/acme_email
       - ONLY_SUBDOMAINS=false
       - STAGING=false
       - MAXMINDDB_LICENSE_KEY=${MAXMINDDB_LICENSE_KEY}
+    secrets:
+      - acme_email
+      - maxminddb
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/swag:/config
@@ -42,8 +45,6 @@ services:
     networks:
       apps: {}
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=${TZ}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
@@ -67,10 +68,13 @@ services:
       - TZ=${TZ}
       - UMASK_SET=022
       - UMASK=022
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql
       - MYSQL_DATABASE=authelia
       - MYSQL_USER=authelia
+    secrets:
+      - mysql
+      - mysql_root
     volumes:
       - ${DOCKER_DIR}/authmariadb:/config
     image: ghcr.io/linuxserver/mariadb:latest
@@ -850,12 +854,16 @@ volumes:
   mylarTempDownloads:
 
 secrets:
+  acme_email:
+    file: ${SECRETS_DIR}/acme_email
   jwt:
     file: ${SECRETS_DIR}/jwt
   session:
     file: ${SECRETS_DIR}/session
   mysql:
     file: ${SECRETS_DIR}/mysql
+  mysql_root:
+    file: ${SECRETS_DIR}/mysql_root
   smtp:
     file: ${SECRETS_DIR}/smtp
   duo:
@@ -868,3 +876,5 @@ secrets:
     file: ${SECRETS_DIR}/ldap
   authmariadb_root_password:
     file: ${SECRETS_DIR}/authmariadb_root_password
+  maxminddb:
+    file: ${SECRETS_DIR}/maxminddb
