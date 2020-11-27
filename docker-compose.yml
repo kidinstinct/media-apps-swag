@@ -242,9 +242,6 @@ services:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-    links:
-      - plex
-      - plex-4k
     command: -B 0.0.0.0:31337 -p /kitana -P
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -660,9 +657,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    links:
-      - plex
-      - plex-4k
     volumes:
       - ${DOCKER_DIR}/ombi:/config
     image: ghcr.io/hotio/ombi:latest
@@ -873,6 +867,10 @@ secrets:
     file: ${SECRETS_DIR}/smtp
   duo:
     file: ${SECRETS_DIR}/duo
+  plex_claim:
+    file: ${SECRETS_DIR}/plex_claim
+  plex_4k_claim:
+    file: ${SECRETS_DIR}/plex_4k_claim
   redis:
     file: ${SECRETS_DIR}/redis
   postgress:
