@@ -32,7 +32,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/swag:/config
-    image: linuxserver/swag:latest
+    image: ghcr.io/linuxserver/swag:latest
 
   # redis - session database (more performance)
   authredis:
@@ -73,7 +73,7 @@ services:
       - MYSQL_USER=authelia
     volumes:
       - ${DOCKER_DIR}/authmariadb:/config
-    image: linuxserver/mariadb:latest
+    image: ghcr.io/linuxserver/mariadb:latest
 
   # Authelia - Self-Hosted Single Sign-On and Two-Factor Authentication
   authelia:
@@ -154,7 +154,7 @@ services:
       - ${DOCKER_DIR}/plex:/config
       - ${DOCKER_DIR}/plex-transcode:/transcode
       - nfsData:/data
-    image: hotio/plex:autoscan
+    image: ghcr.io/hotio/plex:autoscan
 
   # plex - media server
   # Docs: https://hotio.dev/containers/plex/
@@ -179,7 +179,7 @@ services:
       - ${DOCKER_DIR}/plex-4k:/config
       - ${DOCKER_DIR}/plex-4k-transcode:/transcode
       - nfsData:/data
-    image: hotio/plex:autoscan
+    image: ghcr.io/hotio/plex:autoscan
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -194,10 +194,12 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - UMASK=022
+    links:
+      - plex
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/tautulli:/config
-    image: hotio/tautulli:latest
+    image: ghcr.io/hotio/tautulli:latest
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -212,10 +214,12 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - UMASK=022
+    links:
+      - plex-4k
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/tautulli-4k:/config
-    image: hotio/tautulli:latest
+    image: ghcr.io/hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
   # Docs: https://github.com/pannal/Kitana
@@ -255,7 +259,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/sabnzbd:/config
       - downloads:/data/downloads
-    image: hotio/sabnzbd:latest
+    image: ghcr.io/hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
   # Docs: https://hotio.dev/containers/nzbget/
@@ -274,7 +278,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbget:/config
       - downloads:/data/downloads
-    image: hotio/nzbget:latest
+    image: ghcr.io/hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
   # Docs: https://github.com/binhex/arch-qbittorrentvpn
@@ -366,7 +370,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/jackett:/config
       - downloads:/data/downloads
-    image: hotio/jackett:latest
+    image: ghcr.io/hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
   # Docs: https://hotio.dev/containers/nzbhydra2/
@@ -385,7 +389,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbhydra2:/config
       - downloads:/data/downloads
-    image: hotio/nzbhydra2:testing
+    image: ghcr.io/hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
   # Docs: https://hotio.dev/containers/bazarr/
@@ -400,11 +404,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/bazarr:/config
       - nfsData:/data
-    image: hotio/bazarr:nightly
+    image: ghcr.io/hotio/bazarr:nightly
 
   # bazarr - automatic download subtitles
   # Docs: https://hotio.dev/containers/bazarr/
@@ -419,11 +425,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex-4k
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/bazarr-4k:/config
       - nfsData:/data
-    image: hotio/bazarr:nightly
+    image: ghcr.io/hotio/bazarr:nightly
 
   # sonarr - TV Shows
   # Docs: https://hotio.dev/containers/sonarr/
@@ -438,11 +446,16 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
       - downloads:/data/downloads
-    image: hotio/sonarr:nightly
+    image: ghcr.io/hotio/sonarr:nightly
 
   # sonarr - TV Shows
   # Docs: https://hotio.dev/containers/sonarr/
@@ -457,11 +470,16 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/sonarr-4k:/config
       - downloads:/data/downloads
       - nfsData:/data
-    image: hotio/sonarr:nightly
+    image: ghcr.io/hotio/sonarr:nightly
 
   # radarr - Movies
   # Docs: https://hotio.dev/containers/radarr/
@@ -476,11 +494,16 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
       - downloads:/data/downloads
-    image: hotio/radarr:nightly
+    image: ghcr.io/hotio/radarr:nightly
 
   # radarr - Movies
   # Docs: https://hotio.dev/containers/radarr/
@@ -495,11 +518,16 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/radarr-4k:/config
       - nfsData:/data
       - downloads:/data/downloads
-    image: hotio/radarr:nightly
+    image: ghcr.io/hotio/radarr:nightly
 
   # lidarr - Music
   # Docs: https://hotio.dev/containers/lidarr/
@@ -514,6 +542,11 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - nfsData:/data
@@ -521,7 +554,7 @@ services:
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - music:/Music
-    image: hotio/lidarr:nightly
+    image: ghcr.io/hotio/lidarr:nightly
 
   # readarr - eBooks
   # Docs: https://hotio.dev/containers/readarr/
@@ -536,6 +569,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - nzbhydra2
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
+      - calibre
     volumes:
       - ${DOCKER_DIR}/readarr:/config
       - nfsData:/data
@@ -543,7 +583,7 @@ services:
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
-    image: hotio/readarr:nightly
+    image: ghcr.io/hotio/readarr:nightly
 
   # mylar3 - Comics
   # Docs: https://hotio.dev/containers/mylar3/
@@ -558,6 +598,10 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    depends_on:
+      - nzbhydra2
+      - sabnzbd
+      - nzbget
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
       - nfsData:/data
@@ -565,7 +609,7 @@ services:
       - mylarTempDownloads:/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
-    image: hotio/mylar3:nightly
+    image: ghcr.io/hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
   # Docs: https://hub.docker.com/r/linuxserver/lazylibrarian
@@ -580,12 +624,19 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
+      - DEBUG=no
+      - DOCKER_MODS=ghcr.io/linuxserver/calibre-web:calibre|ghcr.io/linuxserver/mods:lazylibrarian-ffmpeg
+    depends_on:
+      - nzbhydra2
+      - sabnzbd
+      - nzbget
+      - deluge
+      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/lazylib:/config
       - nfsData:/data
       - downloads:/data/downloads
-    image: linuxserver/lazylibrarian:latest
+    image: ghcr.io/linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
   # Docs: https://hotio.dev/containers/ombi/
@@ -600,9 +651,12 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex
+      - plex-4k
     volumes:
       - ${DOCKER_DIR}/ombi:/config
-    image: hotio/ombi:latest
+    image: ghcr.io/hotio/ombi:latest
 
   # calibre - ebook management database
   # docs: https://hub.docker.com/r/linuxserver/calibre
@@ -623,7 +677,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre:/config
       - nfsData:/data
-    image: linuxserver/calibre:latest
+    image: ghcr.io/linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
   # docs: https://hub.docker.com/r/linuxserver/calibre-web
@@ -638,12 +692,12 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - DOCKER_MODS=linuxserver/calibre-web:calibre
+      - DOCKER_MODS=ghcr.io/linuxserver/calibre-web:calibre
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre-web:/config
       - nfsData:/data
-    image: linuxserver/calibre-web:latest
+    image: ghcr.io/linuxserver/calibre-web:latest
 
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
   # mostly used for sonarr and the like
@@ -663,7 +717,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/organizr:/config
-    image: organizr/organizr:latest
+    image: ghcr.io/organizr/organizr:latest
 
   # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
   # Docs: https://hotio.dev/containers/trackarr/
@@ -679,9 +733,15 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - DEBUG=no
+    depends_on:
+      - sonarr
+      - sonarr-4k
+      - radarr
+      - radarr-4k
+      - lidarr
     volumes:
       - ${DOCKER_DIR}/trackarr:/config
-    image: hotio/trackarr:nightly
+    image: ghcr.io/hotio/trackarr:nightly
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
   # Docs: https://hotio.dev/containers/requestrr/
@@ -699,7 +759,7 @@ services:
       - DEBUG=no
     volumes:
       - ${DOCKER_DIR}/requestrr:/config
-    image: hotio/requestrr:latest
+    image: ghcr.io/hotio/requestrr:latest
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
   # Docs: https://hotio.dev/containers/requestrr/
@@ -717,7 +777,7 @@ services:
       - DEBUG=no
     volumes:
       - ${DOCKER_DIR}/requestrr-4k:/config
-    image: hotio/requestrr:latest
+    image: ghcr.io/hotio/requestrr:latest
 
   # unpackerr - This application runs as a daemon on your download host. It checks for completed
   # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
@@ -734,12 +794,19 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - DEBUG=no
+    depends_on:
+      - sonarr
+      - sonarr-4k
+      - radarr
+      - radarr-4k
+      - lidarr
+      - readarr
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/unpackerr:/config
       - nfsData:/data
       - downloads:/data/downloads
-    image: hotio/unpackerr:nightly
+    image: ghcr.io/hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
