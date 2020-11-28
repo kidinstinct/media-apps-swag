@@ -452,12 +452,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
@@ -477,12 +471,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/sonarr-4k:/config
       - downloads:/data/downloads
@@ -502,12 +490,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
@@ -527,12 +509,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/radarr-4k:/config
       - nfsData:/data
@@ -552,11 +528,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - nfsData:/data
@@ -579,12 +550,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
       - calibre
     volumes:
       - ${DOCKER_DIR}/readarr:/config
@@ -636,12 +601,6 @@ services:
       - PGID=${PGID}
       - DEBUG=no
       - DOCKER_MODS=ghcr.io/linuxserver/calibre-web:calibre|ghcr.io/linuxserver/mods:lazylibrarian-ffmpeg
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
-      - deluge
-      - qbittorrent
     volumes:
       - ${DOCKER_DIR}/lazylib:/config
       - nfsData:/data
