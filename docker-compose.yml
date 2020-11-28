@@ -573,10 +573,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - nzbget
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
       - nfsData:/data
@@ -699,12 +695,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - DEBUG=no
-    depends_on:
-      - sonarr
-      - sonarr-4k
-      - radarr
-      - radarr-4k
-      - lidarr
     volumes:
       - ${DOCKER_DIR}/trackarr:/config
     image: ghcr.io/hotio/trackarr:nightly
@@ -760,13 +750,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - DEBUG=no
-    depends_on:
-      - sonarr
-      - sonarr-4k
-      - radarr
-      - radarr-4k
-      - lidarr
-      - readarr
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/unpackerr:/config
