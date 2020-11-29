@@ -191,6 +191,27 @@ services:
       - nfsData:/data
     image: ghcr.io/hotio/plex:autoscan
 
+  # jellyfin - media server
+  # Docs: https://hotio.dev/containers/jellyfin/
+  jellyfin:
+    container_name: jellyfin
+    hostname: jellyfin
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32896:8096/tcp
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/jellyfin:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/jellyfin:nightly
+
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
   tautulli:
