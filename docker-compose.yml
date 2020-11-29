@@ -619,7 +619,7 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/ombi:/config
-    image: ghcr.io/hotio/ombi:latest
+    image: ghcr.io/hotio/ombi:testing
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
   # Docs: https://hotio.dev/containers/ombi/
@@ -636,7 +636,7 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/ombi-4k:/config
-    image: ghcr.io/hotio/ombi:latest
+    image: ghcr.io/hotio/ombi:testing
 
   # calibre - ebook management database
   # docs: https://hub.docker.com/r/linuxserver/calibre
