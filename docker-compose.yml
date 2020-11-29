@@ -212,6 +212,27 @@ services:
       - nfsData:/data
     image: ghcr.io/hotio/jellyfin:nightly
 
+  # jellyfin - media server
+  # Docs: https://hotio.dev/containers/jellyfin/
+  jellyfin-4k:
+    container_name: jellyfin-4k
+    hostname: jellyfin-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32996:8096/tcp
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/jellyfin-4k:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/jellyfin:nightly
+
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
   tautulli:
