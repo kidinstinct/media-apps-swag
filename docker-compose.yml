@@ -621,6 +621,23 @@ services:
       - ${DOCKER_DIR}/ombi:/config
     image: ghcr.io/hotio/ombi:latest
 
+  # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
+  # Docs: https://hotio.dev/containers/ombi/
+  ombi-4k:
+    container_name: ombi-4k
+    hostname: ombi-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${DOCKER_DIR}/ombi-4k:/config
+    image: ghcr.io/hotio/ombi:latest
+
   # calibre - ebook management database
   # docs: https://hub.docker.com/r/linuxserver/calibre
   calibre:
