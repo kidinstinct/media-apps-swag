@@ -25,29 +25,33 @@ services:
       - SUBDOMAINS=wildcard
       - DNSPLUGIN=${DNS_PLUGIN}
       - VALIDATION=dns
-      - EMAIL=${ACME_EMAIL}
+      - FILE__EMAIL=/run/secrets/acme_email
       - ONLY_SUBDOMAINS=false
       - STAGING=false
+      - MAXMINDDB_LICENSE_KEY=${MAXMINDDB_LICENSE_KEY}
+    secrets:
+      - acme_email
+      - maxminddb
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/swag:/config'
-    image: linuxserver/swag:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/swag:/config
+    image: ghcr.io/linuxserver/swag:latest
 
   # redis - session database (more performance)
+  # default run PUID is 1001 and PGID is root(0)
+  # cant' seem to change it, folder permissions need to be set accordingly
   authredis:
     container_name: authredis
     hostname: authredis
     restart: unless-stopped
     networks:
       apps: {}
+    environment:
+      - TZ=${TZ}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - ${DOCKER_DIR}/authredis:/bitnami/redis/data
       - ${DOCKER_DIR}/authredis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
     secrets:
       - redis
     command: /opt/bitnami/scripts/redis/run.sh --requirepass ${REDIS_PASSWORD}
@@ -66,15 +70,19 @@ services:
       - TZ=${TZ}
       - UMASK_SET=022
       - UMASK=022
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql
       - MYSQL_DATABASE=authelia
       - MYSQL_USER=authelia
+    secrets:
+      - mysql
+      - mysql_root
     volumes:
       - ${DOCKER_DIR}/authmariadb:/config
-    image: linuxserver/mariadb:latest
+    image: ghcr.io/linuxserver/mariadb:latest
 
   # Authelia - Self-Hosted Single Sign-On and Two-Factor Authentication
+  # Docs: https://www.authelia.com/docs/
   authelia:
     container_name: authelia
     hostname: authelia
@@ -82,10 +90,10 @@ services:
     networks:
       apps: {}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
+      - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/authelia:/config
     environment:
-      - 'TZ=${TZ}'
+      - TZ=${TZ}
       - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
       - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
       - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/mysql
@@ -103,7 +111,10 @@ services:
       - redis
       - postgress
       - ldap
-    image: authelia/authelia:4.21.0
+    depends_on:
+      - authredis
+      - authmariadb
+    image: authelia/authelia:4.23
 
   # portainer - container management frontend
   # - view logs
@@ -121,9 +132,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '/var/run/docker.sock:/var/run/docker.sock'
-      - '${DOCKER_DIR}/portainer:/data'
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer:/data
     image: portainer/portainer-ce:latest
 
   #-----------------------------------------------------------------------------
@@ -139,7 +150,7 @@ services:
     networks:
       apps: {}
     ports:
-      - '32400:32400/tcp'
+      - 32400:32400/tcp
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -149,13 +160,11 @@ services:
       - PLEX_CLAIM=${PLEX_CLAIM}
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/plex:/config'
-      - '${DOCKER_DIR}/plex-transcode:/transcode'
-      - '${DATA_DIR}/media/TV:/TV'
-      - '${DATA_DIR}/media/Movies:/Movies'
-      - '${DATA_DIR}/media/Music:/Music'
-    image: hotio/plex:autoscan
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex:/config
+      - ${DOCKER_DIR}/plex-transcode:/transcode
+      - nfsData:/data
+    image: ghcr.io/hotio/plex:autoscan
 
   # plex - media server
   # Docs: https://hotio.dev/containers/plex/
@@ -166,7 +175,7 @@ services:
     networks:
       apps: {}
     ports:
-      - '32401:32400/tcp'
+      - 32401:32400/tcp
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -176,12 +185,53 @@ services:
       - PLEX_CLAIM=${PLEX_4K_CLAIM}
       - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/plex-4k:/config'
-      - '${DOCKER_DIR}/plex-4k-transcode:/transcode'
-      - '${DATA_DIR}/media/TV-4K:/TV-4K'
-      - '${DATA_DIR}/media/Movies-4K:/Movies-4K'
-    image: hotio/plex:autoscan
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex-4k:/config
+      - ${DOCKER_DIR}/plex-4k-transcode:/transcode
+      - nfsData:/data
+    image: ghcr.io/hotio/plex:autoscan
+
+  # jellyfin - media server
+  # Docs: https://hotio.dev/containers/jellyfin/
+  jellyfin:
+    container_name: jellyfin
+    hostname: jellyfin
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32896:8096/tcp
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/jellyfin:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/jellyfin:nightly
+
+  # jellyfin - media server
+  # Docs: https://hotio.dev/containers/jellyfin/
+  jellyfin-4k:
+    container_name: jellyfin-4k
+    hostname: jellyfin-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32996:8096/tcp
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/jellyfin-4k:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/jellyfin:nightly
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -196,10 +246,12 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - UMASK=022
+    links:
+      - plex
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/tautulli:/config'
-    image: hotio/tautulli:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli:/config
+    image: ghcr.io/hotio/tautulli:latest
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -214,10 +266,12 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - UMASK=022
+    links:
+      - plex-4k
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/tautulli-4k:/config'
-    image: hotio/tautulli:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli-4k:/config
+    image: ghcr.io/hotio/tautulli:latest
 
   # kitana - plex plugin middleware (frontend)
   # Docs: https://github.com/pannal/Kitana
@@ -231,12 +285,10 @@ services:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-    links:
-      - plex
     command: -B 0.0.0.0:31337 -p /kitana -P
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/kitana:/app/data'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/kitana:/app/data
     image: pannal/kitana:latest
 
   # sabnzbd - usenet downloader written in python (easynews)
@@ -253,11 +305,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/sabnzbd:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/sabnzbd:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/sabnzbd:/config
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
   # Docs: https://hotio.dev/containers/nzbget/
@@ -273,11 +324,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/nzbget:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/nzbget:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/nzbget:/config
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
   # Docs: https://github.com/binhex/arch-qbittorrentvpn
@@ -301,7 +351,7 @@ services:
       - LAN_NETWORK=172.20.0.0/16
       - WEBUI_PORT=8080
       - VPN_ENABLED=yes
-      - VPN_PROV=pia
+      - VPN_PROV=${VPN_PROV}
       # options below are openvpn or wireguard (I like wireguard)
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
@@ -311,11 +361,10 @@ services:
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/qbittorrent:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: 'binhex/arch-qbittorrentvpn:latest'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/qbittorrent:/config
+      - downloads:/data/downloads
+    image: binhex/arch-qbittorrentvpn:latest
 
   # deluge - torrent download client with VPN built in
   # Docs: https://github.com/binhex/arch-delugevpn
@@ -338,7 +387,7 @@ services:
       # change below subnet to whatever you configure your docker network to
       - LAN_NETWORK=172.20.0.0/16
       - VPN_ENABLED=yes
-      - VPN_PROV=pia
+      - VPN_PROV=${VPN_PROV}
       # options below are openvpn or wireguard (I like wireguard)
       - VPN_CLIENT=wireguard
       - STRICT_PORT_FORWARD=yes
@@ -348,11 +397,10 @@ services:
       - VPN_USER=${PIA_USERNAME}
       - VPN_PASS=${PIA_PASSWORD}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/deluge:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: 'binhex/arch-delugevpn:latest'
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/deluge:/config
+      - downloads:/data/downloads
+    image: binhex/arch-delugevpn:latest
 
   # jackett - nzb torsnab proxy
   # used to aggregate torrent indexers to use with nzbhydra, sonarr and others
@@ -369,9 +417,9 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/jackett:/config'
-      - '${LOCAL_DL_DIR}/torrents/queue:/torrents'
-    image: hotio/jackett:latest
+      - ${DOCKER_DIR}/jackett:/config
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
   # Docs: https://hotio.dev/containers/nzbhydra2/
@@ -387,10 +435,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/nzbhydra2:/config'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/nzbhydra2:testing
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/nzbhydra2:/config
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/nzbhydra2:testing
 
   # bazarr - automatic download subtitles
   # Docs: https://hotio.dev/containers/bazarr/
@@ -405,12 +453,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/bazarr:/config'
-      - '${DATA_DIR}/media/TV:/TV'
-      - '${DATA_DIR}/media/TV:/Movies'
-    image: hotio/bazarr:nightly
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/bazarr:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/bazarr:nightly
 
   # bazarr - automatic download subtitles
   # Docs: https://hotio.dev/containers/bazarr/
@@ -425,12 +474,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+    links:
+      - plex-4k
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/bazarr-4k:/config'
-      - '${DATA_DIR}/media/TV-4K:/TV-4K'
-      - '${DATA_DIR}/media/TV-4K:/Movies-4K'
-    image: hotio/bazarr:nightly
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/bazarr-4k:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/bazarr:nightly
 
   # sonarr - TV Shows
   # Docs: https://hotio.dev/containers/sonarr/
@@ -446,10 +496,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/sonarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/sonarr:nightly
+      - ${DOCKER_DIR}/sonarr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/sonarr:nightly
 
   # sonarr - TV Shows
   # Docs: https://hotio.dev/containers/sonarr/
@@ -465,10 +515,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/sonarr-4k:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/sonarr:nightly
+      - ${DOCKER_DIR}/sonarr-4k:/config
+      - downloads:/data/downloads
+      - nfsData:/data
+    image: ghcr.io/hotio/sonarr:nightly
 
   # radarr - Movies
   # Docs: https://hotio.dev/containers/radarr/
@@ -484,10 +534,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/radarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/radarr:nightly
+      - ${DOCKER_DIR}/radarr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/radarr:nightly
 
   # radarr - Movies
   # Docs: https://hotio.dev/containers/radarr/
@@ -503,10 +553,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/radarr-4k:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/radarr:nightly
+      - ${DOCKER_DIR}/radarr-4k:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/radarr:nightly
 
   # lidarr - Music
   # Docs: https://hotio.dev/containers/lidarr/
@@ -522,13 +572,13 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/lidarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/lidarr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - music:/Music
-    image: hotio/lidarr:nightly
+    image: ghcr.io/hotio/lidarr:nightly
 
   # readarr - eBooks
   # Docs: https://hotio.dev/containers/readarr/
@@ -543,14 +593,15 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
+      - calibre
     volumes:
-      - '${DOCKER_DIR}/readarr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/readarr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
-    image: hotio/readarr:nightly
+    image: ghcr.io/hotio/readarr:nightly
 
   # mylar3 - Comics
   # Docs: https://hotio.dev/containers/mylar3/
@@ -566,13 +617,13 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/mylar3:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
+      - ${DOCKER_DIR}/mylar3:/config
+      - nfsData:/data
+      - downloads:/data/downloads
       - mylarTempDownloads:/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
-    image: hotio/mylar3:nightly
+    image: ghcr.io/hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
   # Docs: https://hub.docker.com/r/linuxserver/lazylibrarian
@@ -587,12 +638,13 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - DOCKER_MODS=linuxserver/calibre-web:calibre|linuxserver/mods:lazylibrarian-ffmpeg
+      - DEBUG=no
+      - DOCKER_MODS=ghcr.io/linuxserver/calibre-web:calibre|ghcr.io/linuxserver/mods:lazylibrarian-ffmpeg
     volumes:
-      - '${DOCKER_DIR}/lazylib:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: linuxserver/lazylibrarian:latest
+      - ${DOCKER_DIR}/lazylib:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
   # Docs: https://hotio.dev/containers/ombi/
@@ -608,8 +660,25 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
     volumes:
-      - '${DOCKER_DIR}/ombi:/config'
-    image: hotio/ombi:latest
+      - ${DOCKER_DIR}/ombi:/config
+    image: ghcr.io/hotio/ombi:testing
+
+  # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
+  # Docs: https://hotio.dev/containers/ombi/
+  ombi-4k:
+    container_name: ombi-4k
+    hostname: ombi-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${DOCKER_DIR}/ombi-4k:/config
+    image: ghcr.io/hotio/ombi:testing
 
   # calibre - ebook management database
   # docs: https://hub.docker.com/r/linuxserver/calibre
@@ -627,10 +696,10 @@ services:
       - GUAC_USER=${GUAC_USER}
       - GUAC_PASS=${GUAC_PASS}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/calibre:/config'
-      - '${DATA_DIR}:/data'
-    image: linuxserver/calibre:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/calibre:/config
+      - nfsData:/data
+    image: ghcr.io/linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
   # docs: https://hub.docker.com/r/linuxserver/calibre-web
@@ -645,12 +714,12 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - DOCKER_MODS=linuxserver/calibre-web:calibre
+      - DOCKER_MODS=ghcr.io/linuxserver/calibre-web:calibre
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/calibre-web:/config'
-      - '${DATA_DIR}/media/Books/eBooks:/Books'
-    image: linuxserver/calibre-web:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/calibre-web:/config
+      - nfsData:/data
+    image: ghcr.io/linuxserver/calibre-web:latest
 
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
   # mostly used for sonarr and the like
@@ -668,9 +737,9 @@ services:
       - fpm=true
       - branch=v2-develop
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '${DOCKER_DIR}/organizr:/config'
-    image: organizr/organizr:latest
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/organizr:/config
+    image: ghcr.io/organizr/organizr:latest
 
   # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
   # Docs: https://hotio.dev/containers/trackarr/
@@ -687,8 +756,8 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/trackarr:/config'
-    image: hotio/trackarr:nightly
+      - ${DOCKER_DIR}/trackarr:/config
+    image: ghcr.io/hotio/trackarr:nightly
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
   # Docs: https://hotio.dev/containers/requestrr/
@@ -705,8 +774,8 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/requestrr:/config'
-    image: hotio/requestrr:latest
+      - ${DOCKER_DIR}/requestrr:/config
+    image: ghcr.io/hotio/requestrr:latest
 
   # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
   # Docs: https://hotio.dev/containers/requestrr/
@@ -723,8 +792,8 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/requestrr-4k:/config'
-    image: hotio/requestrr:latest
+      - ${DOCKER_DIR}/requestrr-4k:/config
+    image: ghcr.io/hotio/requestrr:latest
 
   # unpackerr - This application runs as a daemon on your download host. It checks for completed
   # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
@@ -742,10 +811,11 @@ services:
       - PGID=${PGID}
       - DEBUG=no
     volumes:
-      - '${DOCKER_DIR}/unpackerr:/config'
-      - '${DATA_DIR}:/data'
-      - '${LOCAL_DL_DIR}:/data/downloads'
-    image: hotio/unpackerr:nightly
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/unpackerr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/unpackerr:nightly
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
@@ -755,9 +825,9 @@ services:
     networks:
       apps: {}
     environment:
-      - 'TZ=${TZ}'
+      - TZ=${TZ}
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
+      - /etc/localtime:/etc/localtime:ro
     image: traefik/whoami
 
 networks:
@@ -768,21 +838,49 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
+  # LOCAL Mounts
+  downloads:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${LOCAL_DL_DIR}
+
+  # NFS Mounts
+  nfsData:
+    driver_opts:
+      type: nfs
+      o: addr=${NAS_IP},rsize=65536,wsize=65536,tcp,noatime,nolock,soft,rw
+      device: :/volume1/data
+
+  # Temp Volumes
   books:
   music:
   mylarTempDownloads:
 
 secrets:
+  acme_email:
+    file: ${SECRETS_DIR}/acme_email
+  calibre_user:
+    file: ${SECRETS_DIR}/calibre_user
+  calibre_pass:
+    file: ${SECRETS_DIR}/calibre_pass
   jwt:
     file: ${SECRETS_DIR}/jwt
   session:
     file: ${SECRETS_DIR}/session
   mysql:
     file: ${SECRETS_DIR}/mysql
+  mysql_root:
+    file: ${SECRETS_DIR}/mysql_root
   smtp:
     file: ${SECRETS_DIR}/smtp
   duo:
     file: ${SECRETS_DIR}/duo
+  plex_claim:
+    file: ${SECRETS_DIR}/plex_claim
+  plex_4k_claim:
+    file: ${SECRETS_DIR}/plex_4k_claim
   redis:
     file: ${SECRETS_DIR}/redis
   postgress:
@@ -791,3 +889,5 @@ secrets:
     file: ${SECRETS_DIR}/ldap
   authmariadb_root_password:
     file: ${SECRETS_DIR}/authmariadb_root_password
+  maxminddb:
+    file: ${SECRETS_DIR}/maxminddb
