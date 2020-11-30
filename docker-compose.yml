@@ -114,7 +114,7 @@ services:
     depends_on:
       - authredis
       - authmariadb
-    image: authelia/authelia:4.21.0
+    image: authelia/authelia:4.23
 
   # portainer - container management frontend
   # - view logs
