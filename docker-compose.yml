@@ -587,6 +587,12 @@ services:
       - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
 
   # sonarr - TV Shows
@@ -606,6 +612,12 @@ services:
       - ${DOCKER_DIR}/sonarr-4k:/config
       - downloads:/data/downloads
       - nfsData:/data
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
 
   # radarr - Movies
@@ -625,6 +637,12 @@ services:
       - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
 
   # radarr - Movies
@@ -644,6 +662,12 @@ services:
       - ${DOCKER_DIR}/radarr-4k:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
 
   # lidarr - Music
@@ -663,9 +687,12 @@ services:
       - ${DOCKER_DIR}/lidarr:/config
       - nfsData:/data
       - downloads:/data/downloads
-      # this is temporary as there was a path restructuring and some errors came up
-      # using a docker volume (below) to map an old root directory
-      - music:/Music
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/lidarr:nightly
 
   # readarr - eBooks
@@ -689,6 +716,12 @@ services:
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/readarr:nightly
 
   # mylar3 - Comics
@@ -706,11 +739,16 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
+      # TEMP DIR for DDL Downloads
+      - ${DOCKER_DIR}/mylar3/downloads:/downloads
       - nfsData:/data
       - downloads:/data/downloads
-      - mylarTempDownloads:/downloads
-      # this is temporary as there was a path restructuring and some errors came up
-      # using a docker volume (below) to map an old root directory
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
@@ -732,6 +770,12 @@ services:
       - ${DOCKER_DIR}/lazylib:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
@@ -851,8 +895,6 @@ volumes:
 
   # Temp Volumes
   books:
-  music:
-  mylarTempDownloads:
 
 secrets:
   acme_email:
