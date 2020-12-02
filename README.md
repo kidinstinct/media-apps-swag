@@ -4,7 +4,7 @@ Collection of docker apps that I run on my ubuntu server.
 
 ## Swag
 
-Setting up `swag`.
+Setting up `swag` is simple.
 
 ## Sabnzbd
 
