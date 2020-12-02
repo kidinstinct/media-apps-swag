@@ -37,6 +37,55 @@ services:
       - ${DOCKER_DIR}/swag:/config
     image: ghcr.io/linuxserver/swag:latest
 
+  # portainer - container management frontend
+  # - view logs
+  # - restart containers
+  # - connect to container shell (if available)
+  # - see configuration
+  portainer:
+    container_name: portainer
+    hostname: portainer
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/portainer:/data
+    image: portainer/portainer-ce:latest
+
+  # organizr - WebApp portal for bookmarks, prevents multiple tabs
+  # mostly used for sonarr and the like
+  # docs: https://hub.docker.com/r/organizr/organizr
+  organizr:
+    container_name: organizr
+    hostname: organizr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - fpm=true
+      - branch=v2-develop
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/organizr:/config
+    image: ghcr.io/organizr/organizr:latest
+
+  #-----------------------------------------------------------------------------
+  # OAUTH and MFA
+  #-----------------------------------------------------------------------------
+  # Comment or delete this section if you're not interested in oauth or MFA.
+  # It is recommended as it adds a layer of security to your applications,
+  # specially if they're internet facing.
+  #-----------------------------------------------------------------------------
+
   # redis - session database (more performance)
   # default run PUID is 1001 and PGID is root(0)
   # cant' seem to change it, folder permissions need to be set accordingly
@@ -116,180 +165,9 @@ services:
       - authmariadb
     image: authelia/authelia:4.23
 
-  # portainer - container management frontend
-  # - view logs
-  # - restart containers
-  # - connect to container shell (if available)
-  # - see configuration
-  portainer:
-    container_name: portainer
-    hostname: portainer
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${DOCKER_DIR}/portainer:/data
-    image: portainer/portainer-ce:latest
-
   #-----------------------------------------------------------------------------
-  # MEDIA
+  # DOWNLOADS
   #-----------------------------------------------------------------------------
-
-  # plex - media server
-  # Docs: https://hotio.dev/containers/plex/
-  plex:
-    container_name: plex
-    hostname: plex
-    restart: unless-stopped
-    networks:
-      apps: {}
-    ports:
-      - 32400:32400/tcp
-    environment:
-      - TZ=${TZ}
-      - PLEX_UID=${PUID}
-      - PLEX_GID=${PGID}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - PLEX_CLAIM=${PLEX_CLAIM}
-      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/plex:/config
-      - ${DOCKER_DIR}/plex-transcode:/transcode
-      - nfsData:/data
-    image: ghcr.io/hotio/plex:autoscan
-
-  # plex - media server
-  # Docs: https://hotio.dev/containers/plex/
-  plex-4k:
-    container_name: plex-4k
-    hostname: plex-4k
-    restart: unless-stopped
-    networks:
-      apps: {}
-    ports:
-      - 32401:32400/tcp
-    environment:
-      - TZ=${TZ}
-      - PLEX_UID=${PUID}
-      - PLEX_GID=${PGID}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - PLEX_CLAIM=${PLEX_4K_CLAIM}
-      - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/plex-4k:/config
-      - ${DOCKER_DIR}/plex-4k-transcode:/transcode
-      - nfsData:/data
-    image: ghcr.io/hotio/plex:autoscan
-
-  # jellyfin - media server
-  # Docs: https://hotio.dev/containers/jellyfin/
-  jellyfin:
-    container_name: jellyfin
-    hostname: jellyfin
-    restart: unless-stopped
-    networks:
-      apps: {}
-    ports:
-      - 32896:8096/tcp
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/jellyfin:/config
-      - nfsData:/data
-    image: ghcr.io/hotio/jellyfin:nightly
-
-  # jellyfin - media server
-  # Docs: https://hotio.dev/containers/jellyfin/
-  jellyfin-4k:
-    container_name: jellyfin-4k
-    hostname: jellyfin-4k
-    restart: unless-stopped
-    networks:
-      apps: {}
-    ports:
-      - 32996:8096/tcp
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/jellyfin-4k:/config
-      - nfsData:/data
-    image: ghcr.io/hotio/jellyfin:nightly
-
-  # tautulli - plex monitor
-  # Docs: https://hotio.dev/containers/tautulli/
-  tautulli:
-    container_name: tautulli
-    hostname: tautulli
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=022
-    links:
-      - plex
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/tautulli:/config
-    image: ghcr.io/hotio/tautulli:latest
-
-  # tautulli - plex monitor
-  # Docs: https://hotio.dev/containers/tautulli/
-  tautulli-4k:
-    container_name: tautulli-4k
-    hostname: tautulli-4k
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK=022
-    links:
-      - plex-4k
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/tautulli-4k:/config
-    image: ghcr.io/hotio/tautulli:latest
-
-  # kitana - plex plugin middleware (frontend)
-  # Docs: https://github.com/pannal/Kitana
-  kitana:
-    container_name: kitana
-    hostname: kitana
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    command: -B 0.0.0.0:31337 -p /kitana -P
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/kitana:/app/data
-    image: pannal/kitana:latest
 
   # sabnzbd - usenet downloader written in python (easynews)
   # Docs: https://hotio.dev/containers/sabnzbd/
@@ -440,6 +318,218 @@ services:
       - downloads:/data/downloads
     image: ghcr.io/hotio/nzbhydra2:testing
 
+  # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
+  # Docs: https://hotio.dev/containers/trackarr/
+  trackarr:
+    container_name: trackarr
+    hostname: trackarr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - ${DOCKER_DIR}/trackarr:/config
+    image: ghcr.io/hotio/trackarr:nightly
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr:
+    container_name: requestrr
+    hostname: requestrr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - ${DOCKER_DIR}/requestrr:/config
+    image: ghcr.io/hotio/requestrr:latest
+
+  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
+  # Docs: https://hotio.dev/containers/requestrr/
+  requestrr-4k:
+    container_name: requestrr-4k
+    hostname: requestrr-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - ${DOCKER_DIR}/requestrr-4k:/config
+    image: ghcr.io/hotio/requestrr:latest
+
+  # unpackerr - This application runs as a daemon on your download host. It checks for completed
+  # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
+  # Docs: https://hotio.dev/containers/requestrr/
+  unpackerr:
+    container_name: unpackerr
+    hostname: unpackerr
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/unpackerr:/config
+      - nfsData:/data
+      - downloads:/data/downloads
+    image: ghcr.io/hotio/unpackerr:nightly
+
+  #-----------------------------------------------------------------------------
+  # MEDIA
+  #-----------------------------------------------------------------------------
+
+  # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
+  plex:
+    container_name: plex
+    hostname: plex
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32400:32400/tcp
+    environment:
+      - TZ=${TZ}
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex:/config
+      - ${DOCKER_DIR}/plex-transcode:/transcode
+      - nfsData:/data
+    image: ghcr.io/hotio/plex:autoscan
+
+  # plex - media server
+  # Docs: https://hotio.dev/containers/plex/
+  plex-4k:
+    container_name: plex-4k
+    hostname: plex-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 32401:32400/tcp
+    environment:
+      - TZ=${TZ}
+      - PLEX_UID=${PUID}
+      - PLEX_GID=${PGID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - PLEX_CLAIM=${PLEX_4K_CLAIM}
+      - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/plex-4k:/config
+      - ${DOCKER_DIR}/plex-4k-transcode:/transcode
+      - nfsData:/data
+    image: ghcr.io/hotio/plex:autoscan
+
+  # jellyfin - media server
+  # Docs: https://hotio.dev/containers/jellyfin/
+  jellyfin:
+    container_name: jellyfin
+    hostname: jellyfin
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 8096:8096/tcp
+      - 1900:1900/udp
+      - 7359:7359/udp
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - DEBUG=no
+      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_URI}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/jellyfin:/config
+      - nfsData:/data
+    image: ghcr.io/hotio/jellyfin:nightly
+
+  # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
+  tautulli:
+    container_name: tautulli
+    hostname: tautulli
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=022
+    links:
+      - plex
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli:/config
+    image: ghcr.io/hotio/tautulli:latest
+
+  # tautulli - plex monitor
+  # Docs: https://hotio.dev/containers/tautulli/
+  tautulli-4k:
+    container_name: tautulli-4k
+    hostname: tautulli-4k
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=022
+    links:
+      - plex-4k
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/tautulli-4k:/config
+    image: ghcr.io/hotio/tautulli:latest
+
+  # kitana - plex plugin middleware (frontend)
+  # Docs: https://github.com/pannal/Kitana
+  kitana:
+    container_name: kitana
+    hostname: kitana
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    command: -B 0.0.0.0:31337 -p /kitana -P
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/kitana:/app/data
+    image: pannal/kitana:latest
+
   # bazarr - automatic download subtitles
   # Docs: https://hotio.dev/containers/bazarr/
   bazarr:
@@ -499,6 +589,12 @@ services:
       - ${DOCKER_DIR}/sonarr:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
 
   # sonarr - TV Shows
@@ -518,6 +614,12 @@ services:
       - ${DOCKER_DIR}/sonarr-4k:/config
       - downloads:/data/downloads
       - nfsData:/data
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
 
   # radarr - Movies
@@ -537,6 +639,12 @@ services:
       - ${DOCKER_DIR}/radarr:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
 
   # radarr - Movies
@@ -556,6 +664,12 @@ services:
       - ${DOCKER_DIR}/radarr-4k:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
 
   # lidarr - Music
@@ -575,9 +689,12 @@ services:
       - ${DOCKER_DIR}/lidarr:/config
       - nfsData:/data
       - downloads:/data/downloads
-      # this is temporary as there was a path restructuring and some errors came up
-      # using a docker volume (below) to map an old root directory
-      - music:/Music
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/lidarr:nightly
 
   # readarr - eBooks
@@ -601,6 +718,12 @@ services:
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/readarr:nightly
 
   # mylar3 - Comics
@@ -618,11 +741,16 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
+      # TEMP DIR for DDL Downloads
+      - ${DOCKER_DIR}/mylar3/downloads:/downloads
       - nfsData:/data
       - downloads:/data/downloads
-      - mylarTempDownloads:/downloads
-      # this is temporary as there was a path restructuring and some errors came up
-      # using a docker volume (below) to map an old root directory
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/hotio/mylar3:nightly
 
   # lazylib - eBooks and Audiobooks
@@ -644,6 +772,12 @@ services:
       - ${DOCKER_DIR}/lazylib:/config
       - nfsData:/data
       - downloads:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
     image: ghcr.io/linuxserver/lazylibrarian:latest
 
   # ombi - sonarr, radarr, lidarr middleware (request tv, movies, music)
@@ -721,101 +855,9 @@ services:
       - nfsData:/data
     image: ghcr.io/linuxserver/calibre-web:latest
 
-  # organizr - WebApp portal for bookmarks, prevents multiple tabs
-  # mostly used for sonarr and the like
-  # docs: https://hub.docker.com/r/organizr/organizr
-  organizr:
-    container_name: organizr
-    hostname: organizr
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - fpm=true
-      - branch=v2-develop
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/organizr:/config
-    image: ghcr.io/organizr/organizr:latest
-
-  # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
-  # Docs: https://hotio.dev/containers/trackarr/
-  trackarr:
-    container_name: trackarr
-    hostname: trackarr
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - ${DOCKER_DIR}/trackarr:/config
-    image: ghcr.io/hotio/trackarr:nightly
-
-  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
-  # Docs: https://hotio.dev/containers/requestrr/
-  requestrr:
-    container_name: requestrr
-    hostname: requestrr
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - ${DOCKER_DIR}/requestrr:/config
-    image: ghcr.io/hotio/requestrr:latest
-
-  # requestrr a chatbot used to simplify using services like Sonarr/Radarr/Ombi via the use of chat!
-  # Docs: https://hotio.dev/containers/requestrr/
-  requestrr-4k:
-    container_name: requestrr-4k
-    hostname: requestrr-4k
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - ${DOCKER_DIR}/requestrr-4k:/config
-    image: ghcr.io/hotio/requestrr:latest
-
-  # unpackerr - This application runs as a daemon on your download host. It checks for completed
-  # downloads and extracts them so Radarr and/or Sonarr and/or Lidarr may import them.
-  # Docs: https://hotio.dev/containers/requestrr/
-  unpackerr:
-    container_name: unpackerr
-    hostname: unpackerr
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/unpackerr:/config
-      - nfsData:/data
-      - downloads:/data/downloads
-    image: ghcr.io/hotio/unpackerr:nightly
+  #-----------------------------------------------------------------------------
+  # MISC
+  #-----------------------------------------------------------------------------
 
   # whoami - simple service that returns PC information from where it was accessed.
   # this is being used to keep apex domain alive
@@ -855,8 +897,6 @@ volumes:
 
   # Temp Volumes
   books:
-  music:
-  mylarTempDownloads:
 
 secrets:
   acme_email:
