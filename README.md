@@ -2,6 +2,10 @@
 
 Collection of docker apps that I run on my ubuntu server.
 
+## Swag
+
+Setting up `swag`.
+
 ## Sabnzbd
 
 Requires to edit the `$DOCKER_DIR/sabnzbd/app/sabnzbd.ini` file to whitelist the domain since by default there's no authentication and it's being access via reverse-proxy.
