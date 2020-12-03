@@ -460,35 +460,6 @@ services:
       - nfsData:/data
     image: ghcr.io/hotio/plex:autoscan
 
-  # jellyfin - media server
-  # Docs: https://hotio.dev/containers/jellyfin/
-  jellyfin:
-    container_name: jellyfin
-    hostname: jellyfin
-    restart: unless-stopped
-    networks:
-      apps: {}
-    ports:
-      - 8096:8096/tcp
-      - 1900:1900/udp
-      - 7359:7359/udp
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - DEBUG=no
-      - JELLYFIN_PublishedServerUrl=${JELLYFIN_PUBLISHED_URI}
-      #-------------------------------------------------------------------------
-      # If you have an nvidia GPU
-      #-------------------------------------------------------------------------
-      - NVIDIA_VISIBLE_DEVICES=all
-      #-------------------------------------------------------------------------
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/jellyfin:/config
-      - nfsData:/data
-    image: ghcr.io/hotio/jellyfin:nightly
-
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
   tautulli:
