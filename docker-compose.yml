@@ -185,7 +185,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/sabnzbd:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/sabnzbd:latest
 
   # nzbget - usenet downloader written in C++ (easynews)
@@ -204,7 +204,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbget:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
@@ -241,7 +241,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/qbittorrent:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: binhex/arch-qbittorrentvpn:latest
 
   # deluge - torrent download client with VPN built in
@@ -277,7 +277,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/deluge:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: binhex/arch-delugevpn:latest
 
   # jackett - nzb torsnab proxy
@@ -296,7 +296,7 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/jackett:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/jackett:latest
 
   # nzbhydra2 - usenet and torsnab indexer proxy
@@ -315,7 +315,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/nzbhydra2:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/nzbhydra2:testing
 
   # trackarr - Tracker announcements to Sonarr/Radarr/Lidarr.
@@ -391,7 +391,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/unpackerr:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/unpackerr:nightly
 
   #-----------------------------------------------------------------------------
@@ -576,7 +576,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
@@ -600,7 +600,7 @@ services:
       - PGID=${PGID}
     volumes:
       - ${DOCKER_DIR}/sonarr-4k:/config
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
       - ${DATA_DIR}:/data
     depends_on:
       - nzbhydra2
@@ -626,7 +626,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/radarr:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
@@ -651,7 +651,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/radarr-4k:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
@@ -676,7 +676,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lidarr:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
@@ -702,7 +702,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/readarr:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
       - books:/Books
@@ -730,9 +730,9 @@ services:
     volumes:
       - ${DOCKER_DIR}/mylar3:/config
       # TEMP DIR for DDL Downloads
-      - ${DOCKER_DIR}/mylar3/${LOCAL_DL_DIR}:/downloads
+      - ${DOCKER_DIR}/mylar3/${DOWNLOAD_DIR}:/downloads
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
@@ -759,7 +759,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/lazylib:/config
       - ${DATA_DIR}:/data
-      - ${LOCAL_DL_DIR}:/data/downloads
+      - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
       - nzbget
