@@ -660,6 +660,31 @@ services:
       - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
 
+  # radarr - Movies
+  # Docs: https://hotio.dev/containers/radarr/
+  radarr-4k-remux:
+    container_name: radarr-4k-remux
+    hostname: radarr-4k-remux
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${DOCKER_DIR}/radarr-4k-remux:/config
+      - ${DATA_DIR}:/data
+      - ${DOWNLOAD_DIR}:/data/downloads
+    depends_on:
+      - nzbhydra2
+      - nzbget
+      - sabnzbd
+      - deluge
+      - qbittorrent
+    image: ghcr.io/hotio/radarr:nightly
+
   # lidarr - Music
   # Docs: https://hotio.dev/containers/lidarr/
   lidarr:
