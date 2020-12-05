@@ -1,0 +1,15 @@
+{
+  "name": "SDR",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "name": "SDR",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": true,
+      "fields": {
+        "value": "\\bSDR(\\b|\\d)"
+      }
+    }
+  ]
+}
