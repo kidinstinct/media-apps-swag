@@ -703,9 +703,6 @@ services:
       - ${DOCKER_DIR}/readarr:/config
       - ${DATA_DIR}:/data
       - ${DOWNLOAD_DIR}:/data/downloads
-      # this is temporary as there was a path restructuring and some errors came up
-      # using a docker volume (below) to map an old root directory
-      - books:/Books
     depends_on:
       - nzbhydra2
       - nzbget
@@ -866,10 +863,6 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
-
-volumes:
-  # Temp Volumes
-  books:
 
 secrets:
   acme_email:
