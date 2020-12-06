@@ -44,7 +44,7 @@
       "negate": false,
       "required": false,
       "fields": {
-        "value": "\\b(SWTYBLZ|BATGirl|Tigole|PSA)"
+        "value": "\\b(SWTYBLZ|BATGirl|Tigole|PSA|GOKITAOE)"
       }
     }
   ]
