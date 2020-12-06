@@ -35,7 +35,16 @@
       "negate": false,
       "required": false,
       "fields": {
-        "value": "-beAst|-CHD|-HDWinG|-MTeam|-MySiLU|-WiKi"
+        "value": "-beAst|-CHD|-HDWinG|-MTeam|-MySiLU|-WiKi|-?\\.?Weasley|-?\\.?Hone"
+      }
+    },
+    {
+      "name": "]BLOCK5]",
+      "implementation": "ReleaseTitleSpecification",
+      "negate": false,
+      "required": false,
+      "fields": {
+        "value": "\\b(SWTYBLZ|BATGirl|Tigole|PSA)"
       }
     }
   ]
