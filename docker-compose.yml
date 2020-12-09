@@ -58,6 +58,49 @@ services:
       - ${DOCKER_DIR}/portainer:/data
     image: portainer/portainer-ce:latest
 
+  # --------------------------------------------------------------------------
+  # unifi - ubiquiti management controller
+  unifi:
+    container_name: unifi
+    hostname: unifi
+    restart: unless-stopped
+    networks:
+      apps: {}
+    ports:
+      - 5514:5514
+      - 3478:3478/udp
+      - 6789:6789
+      - 8080:8080
+      - 8443:8443
+      - 8843:8843
+      - 8880:8880
+      - 10001:10001/udp
+    environment:
+      - TZ=America/New_York
+      - BASEDIR=/usr/lib/unifi
+      - DATADIR=/unifi/data
+      - LOGDIR=/unifi/log
+      - CERTDIR=/unifi/cert
+      - RUNDIR=/var/run/unifi
+      - ODATADIR=/var/lib/unifi
+      - OLOGDIR=/var/log/unifi
+      - CERTNAME=cert.pem
+      - CERT_PRIVATE_NAME=privkey.pem
+      - CERT_IS_CHAIN=false
+      - GOSU_VERSION=1.10
+      - BIND_PRIV=false
+      - RUNAS_UID0=false
+      - UNIFI_GID=100
+      - UNIFI_UID=${PUID}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/unifi:/unifi
+      - /var/run/unifi
+    command: unifi
+    image: jacobalberty/unifi:latest
+
   # organizr - WebApp portal for bookmarks, prevents multiple tabs
   # mostly used for sonarr and the like
   # docs: https://hub.docker.com/r/organizr/organizr
