@@ -458,6 +458,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - PLEX_CLAIM=${PLEX_CLAIM}
+      - PLEX_PASS="yes"
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
       #-------------------------------------------------------------------------
       # If you have an nvidia GPU
@@ -489,6 +490,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - PLEX_CLAIM=${PLEX_4K_CLAIM}
+      - PLEX_PASS="yes"
       - ADVERTISE_IP=${PLEX_4K_ADVERTISE_IP}
       #-------------------------------------------------------------------------
       # If you have an nvidia GPU
