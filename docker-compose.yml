@@ -457,8 +457,9 @@ services:
       - PLEX_GID=${PGID}
       - PUID=${PUID}
       - PGID=${PGID}
+      - DEBUG=yes
       - PLEX_CLAIM=${PLEX_CLAIM}
-      - PLEX_PASS="yes"
+      - PLEX_PASS=yes
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
       #-------------------------------------------------------------------------
       # If you have an nvidia GPU
