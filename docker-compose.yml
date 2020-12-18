@@ -865,34 +865,34 @@ volumes:
 
 secrets:
   acme_email:
-    file: ${SECRETS_DIR}/acme_email
+    file: ${DOCKER_DIR}/secrets/acme_email
   calibre_user:
-    file: ${SECRETS_DIR}/calibre_user
+    file: ${DOCKER_DIR}/secrets/calibre_user
   calibre_pass:
-    file: ${SECRETS_DIR}/calibre_pass
+    file: ${DOCKER_DIR}/secrets/calibre_pass
   jwt:
-    file: ${SECRETS_DIR}/jwt
+    file: ${DOCKER_DIR}/secrets/jwt
   session:
-    file: ${SECRETS_DIR}/session
+    file: ${DOCKER_DIR}/secrets/session
   mysql:
-    file: ${SECRETS_DIR}/mysql
+    file: ${DOCKER_DIR}/secrets/mysql
   mysql_root:
-    file: ${SECRETS_DIR}/mysql_root
+    file: ${DOCKER_DIR}/secrets/mysql_root
   smtp:
-    file: ${SECRETS_DIR}/smtp
+    file: ${DOCKER_DIR}/secrets/smtp
   duo:
-    file: ${SECRETS_DIR}/duo
+    file: ${DOCKER_DIR}/secrets/duo
   plex_claim:
-    file: ${SECRETS_DIR}/plex_claim
+    file: ${DOCKER_DIR}/secrets/plex_claim
   plex_4k_claim:
-    file: ${SECRETS_DIR}/plex_4k_claim
+    file: ${DOCKER_DIR}/secrets/plex_4k_claim
   redis:
-    file: ${SECRETS_DIR}/redis
+    file: ${DOCKER_DIR}/secrets/redis
   postgress:
-    file: ${SECRETS_DIR}/postgress
+    file: ${DOCKER_DIR}/secrets/postgress
   ldap:
-    file: ${SECRETS_DIR}/ldap
+    file: ${DOCKER_DIR}/secrets/ldap
   authmariadb_root_password:
-    file: ${SECRETS_DIR}/authmariadb_root_password
+    file: ${DOCKER_DIR}/secrets/authmariadb_root_password
   maxminddb:
-    file: ${SECRETS_DIR}/maxminddb
+    file: ${DOCKER_DIR}/secrets/maxminddb
