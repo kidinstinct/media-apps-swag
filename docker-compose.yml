@@ -231,25 +231,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/hotio/sabnzbd:latest
 
-  # nzbget - usenet downloader written in C++ (easynews)
-  # Docs: https://hotio.dev/containers/nzbget/
-  nzbget:
-    container_name: nzbget
-    hostname: nzbget
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/nzbget:/config
-      - ${DOWNLOAD_DIR}:/data/downloads
-    image: ghcr.io/hotio/nzbget:latest
-
   # qbittorrent - torrent download client with VPN built in
   # Docs: https://github.com/binhex/arch-qbittorrentvpn
   # Read the documentaton on proper setup of either wireguard or openvpn
@@ -534,7 +515,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
@@ -558,7 +538,6 @@ services:
       - ${DATA_DIR}:/data
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
@@ -582,7 +561,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
@@ -606,7 +584,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/radarr:nightly
@@ -630,7 +607,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/lidarr:nightly
@@ -658,7 +634,6 @@ services:
       - books:/Books
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/readarr:nightly
@@ -684,7 +659,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/mylar3:nightly
@@ -710,7 +684,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
-      - nzbget
       - sabnzbd
       - qbittorrent
     image: ghcr.io/linuxserver/lazylibrarian:latest
