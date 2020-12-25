@@ -417,7 +417,7 @@ services:
       - ${DOCKER_DIR}/plex:/config
       - ${DOCKER_DIR}/plex-transcode:/transcode
       - ${SMB_DATA_DIR}:/data
-    image: ghcr.io/hotio/plex:latest
+    image: ghcr.io/hotio/plex:autoscan
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -468,7 +468,7 @@ services:
       - ${DOCKER_DIR}/plex-4k:/config
       - ${DOCKER_DIR}/plex-4k-transcode:/transcode
       - ${SMB_DATA_DIR}:/data
-    image: ghcr.io/hotio/plex:latest
+    image: ghcr.io/hotio/plex:autoscan
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
