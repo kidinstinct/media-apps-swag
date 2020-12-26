@@ -560,7 +560,6 @@ services:
     volumes:
       - ${DOCKER_DIR}/sonarr:/config
       - ${DATA_DIR}:/data
-      - TV:/TV
       - ${DOWNLOAD_DIR}:/data/downloads
     depends_on:
       - nzbhydra2
@@ -839,7 +838,6 @@ networks:
 volumes:
   # Temp Volumes
   books:
-  TV:
 
 secrets:
   acme_email:

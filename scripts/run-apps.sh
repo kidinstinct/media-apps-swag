@@ -5,6 +5,7 @@ echo "Clearing unused networks"
 echo "--------------------------------------------"
 sleep 2
 sudo docker network prune -f
+sudo docker volume prune -f
 
 echo "--------------------------------------------"
 echo "Pulling new images (if any are available)"
