@@ -417,7 +417,7 @@ services:
       - ${DOCKER_DIR}/plex:/config
       - ${DOCKER_DIR}/plex-transcode:/transcode
       - ${SMB_DATA_DIR}:/data
-    image: ghcr.io/hotio/plex:autoscan
+    image: ghcr.io/hotio/plex:release
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -468,7 +468,7 @@ services:
       - ${DOCKER_DIR}/plex-4k:/config
       - ${DOCKER_DIR}/plex-4k-transcode:/transcode
       - ${SMB_DATA_DIR}:/data
-    image: ghcr.io/hotio/plex:autoscan
+    image: ghcr.io/hotio/plex:release
 
   # tautulli - plex monitor
   # Docs: https://hotio.dev/containers/tautulli/
@@ -487,6 +487,26 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/tautulli-4k:/config
     image: ghcr.io/hotio/tautulli:latest
+
+  # autoscan - replaces the default Plex behaviour for picking up file changes on the file system
+  # Docs: https://github.com/Cloudbox/autoscan
+  autoscan:
+    container_name: autoscan
+    hostname: autoscan
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK=022
+      - DEBUG=yes
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/autoscan:/config
+      - ${DATA_DIR}:/data
+    image: ghcr.io/hotio/autoscan:nightly
 
   # kitana - plex plugin middleware (frontend)
   # Docs: https://github.com/pannal/Kitana
