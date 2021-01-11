@@ -662,6 +662,8 @@ services:
       - nzbhydra2
       - sabnzbd
       - qbittorrent
+    links:
+      - amd
     image: ghcr.io/hotio/lidarr:nightly
 
   # amd - is a Lidarr companion script to automatically download music for Lidarr
