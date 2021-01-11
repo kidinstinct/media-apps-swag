@@ -826,8 +826,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/amd:/config
       - ${DOWNLOAD_DIR}/ama/amd:/downloads-amd
-    depends_on:
-      - lidarr
     image: randomninjaatk/amd:latest
 
   # readarr - eBooks
