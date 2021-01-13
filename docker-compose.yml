@@ -567,30 +567,6 @@ services:
       - qbittorrent
     image: ghcr.io/hotio/sonarr:nightly
 
-  # medusa - TV Shows (using for anime only)
-  # Docs: https://hub.docker.com/r/linuxserver/medusa
-  medusa:
-    container_name: medusa
-    hostname: medusa
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/medusa:/config
-      - ${DOWNLOAD_DIR}:/data/downloads
-      - ${DATA_DIR}:/data
-    depends_on:
-      - nzbhydra2
-      - sabnzbd
-      - qbittorrent
-    image: ghcr.io/linuxserver/medusa:latest
-
   # radarr - Movies
   # Docs: https://hotio.dev/containers/radarr/
   radarr:
@@ -678,7 +654,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - AUTOSTART=true
-      - SCRIPTINTERVAL=1h
+      - SCRIPTINTERVAL=15m
       - DOWNLOADMODE=wanted
       - FALLBACKSEARCH=True
       - LIST=both
