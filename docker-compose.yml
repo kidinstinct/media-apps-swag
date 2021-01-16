@@ -37,27 +37,6 @@ services:
       - ${DOCKER_DIR}/swag:/config
     image: ghcr.io/linuxserver/swag:latest
 
-  # portainer - container management frontend
-  # - view logs
-  # - restart containers
-  # - connect to container shell (if available)
-  # - see configuration
-  portainer:
-    container_name: portainer
-    hostname: portainer
-    restart: unless-stopped
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${DOCKER_DIR}/portainer:/data
-    image: portainer/portainer-ce:latest
-
   # --------------------------------------------------------------------------
   # unifi - ubiquiti management controller
   unifi:
@@ -654,7 +633,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - AUTOSTART=true
-      - SCRIPTINTERVAL=15m
+      - SCRIPTINTERVAL=1h
       - DOWNLOADMODE=wanted
       - FALLBACKSEARCH=True
       - LIST=both
@@ -666,7 +645,7 @@ services:
       - ENABLEPOSTPROCESSING=true
       - FORCECONVERT=false
       - requirequality=false
-      - MatchDistance=7
+      - MatchDistance=10
       - replaygain=true
       - FolderPermissions=755
       - FilePermissions=664
@@ -687,6 +666,43 @@ services:
     depends_on:
       - lidarr
     image: randomninjaatk/amd:latest
+
+  # amvd - is a Lidarr companion script to automatically download music videos
+  # Docs: https://github.com/RandomNinjaAtk/docker-amvd
+  amvd:
+    container_name: amvd
+    hostname: amvd
+    restart: unless-stopped
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - AUTOSTART=true
+      - SCRIPTINTERVAL=15m
+      - replaygain=true
+      - FolderPermissions=755
+      - FilePermissions=664
+      - MBRATELIMIT=1
+      - LidarrUrl=http://lidarr:8686/lidarr
+      - LidarrAPIkey=${LIDARR_API_KEY}
+      - SOURCE_CONNECTION=lidarr
+      - CountryCode=us
+      - RequireVideoMatch=true
+      - subtitlelanguage=en
+      - videofilter="live"
+      - WriteNFOs=true
+      - USEFOLDERS=true
+      - USEVIDEOFOLDERS=true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/amvd:/config
+      - ${MEDIA_DIR}/Music-Videos:/downloads-amvd
+    depends_on:
+      - lidarr
+    image: randomninjaatk/amvd:latest
 
   # readarr - eBooks
   # Docs: https://hotio.dev/containers/readarr/
