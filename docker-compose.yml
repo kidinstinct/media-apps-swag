@@ -681,7 +681,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - AUTOSTART=true
-      - SCRIPTINTERVAL=15m
+      - SCRIPTINTERVAL=1h
       - replaygain=true
       - FolderPermissions=755
       - FilePermissions=664
