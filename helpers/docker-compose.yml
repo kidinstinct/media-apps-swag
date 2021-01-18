@@ -1,0 +1,123 @@
+version: '3.3'
+services:
+  #-----------------------------------------------------------------------------
+  # HELPERS
+  #-----------------------------------------------------------------------------
+
+  # amd - is a Lidarr companion script to automatically download music for Lidarr
+  # Docs: https://github.com/RandomNinjaAtk/docker-amd
+  amd:
+    container_name: amd
+    hostname: amd
+    restart: unless-stopped
+    networks:
+      media-apps-swag_apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - AUTOSTART=true
+      - SCRIPTINTERVAL=1h
+      - DOWNLOADMODE=wanted
+      - FALLBACKSEARCH=True
+      - LIST=both
+      - SearchType=both
+      - Concurrency=2
+      - EMBEDDED_COVER_QUALITY=80
+      - FORMAT=FLAC
+      - BITRATE=320
+      - ENABLEPOSTPROCESSING=true
+      - FORCECONVERT=false
+      - requirequality=false
+      - MatchDistance=10
+      - replaygain=true
+      - FolderPermissions=755
+      - FilePermissions=664
+      - MBRAINZMIRROR=https://musicbrainz.org
+      - MBRATELIMIT=1
+      - LidarrUrl=http://lidarr:8686/lidarr
+      - LidarrAPIkey=${LIDARR_API_KEY}
+      - ARL_TOKEN=${ARL_DEEZER_TOKEN}
+      - NOTIFYPLEX=true
+      - PLEXLIBRARYNAME=Music
+      - PLEXURL=http://plex:32400
+      - PLEXTOKEN=${PLEX_TOKEN}
+      - POSTPROCESSTHREADS=2
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/amd:/config
+      - ${DOWNLOAD_DIR}/ama:/downloads-amd
+    image: randomninjaatk/amd:latest
+
+  # amvd - is a Lidarr companion script to automatically download music videos
+  # Docs: https://github.com/RandomNinjaAtk/docker-amvd
+  amvd:
+    container_name: amvd
+    hostname: amvd
+    restart: unless-stopped
+    networks:
+      media-apps-swag_apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - AUTOSTART=true
+      - SCRIPTINTERVAL=1h
+      - replaygain=true
+      - FolderPermissions=755
+      - FilePermissions=664
+      - MBRATELIMIT=1
+      - LidarrUrl=http://lidarr:8686/lidarr
+      - LidarrAPIkey=${LIDARR_API_KEY}
+      - SOURCE_CONNECTION=lidarr
+      - CountryCode=us
+      - RequireVideoMatch=true
+      - subtitlelanguage=en
+      - videofilter="live"
+      - WriteNFOs=true
+      - USEFOLDERS=true
+      - USEVIDEOFOLDERS=true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/amvd:/config
+    image: randomninjaatk/amvd:latest
+
+networks:
+  media-apps-swag_apps:
+    external: true
+
+secrets:
+  acme_email:
+    file: ${DOCKER_DIR}/secrets/acme_email
+  calibre_user:
+    file: ${DOCKER_DIR}/secrets/calibre_user
+  calibre_pass:
+    file: ${DOCKER_DIR}/secrets/calibre_pass
+  jwt:
+    file: ${DOCKER_DIR}/secrets/jwt
+  session:
+    file: ${DOCKER_DIR}/secrets/session
+  mysql:
+    file: ${DOCKER_DIR}/secrets/mysql
+  mysql_root:
+    file: ${DOCKER_DIR}/secrets/mysql_root
+  smtp:
+    file: ${DOCKER_DIR}/secrets/smtp
+  duo:
+    file: ${DOCKER_DIR}/secrets/duo
+  plex_claim:
+    file: ${DOCKER_DIR}/secrets/plex_claim
+  plex_4k_claim:
+    file: ${DOCKER_DIR}/secrets/plex_4k_claim
+  redis:
+    file: ${DOCKER_DIR}/secrets/redis
+  postgress:
+    file: ${DOCKER_DIR}/secrets/postgress
+  ldap:
+    file: ${DOCKER_DIR}/secrets/ldap
+  authmariadb_root_password:
+    file: ${DOCKER_DIR}/secrets/authmariadb_root_password
+  maxminddb:
+    file: ${DOCKER_DIR}/secrets/maxminddb
