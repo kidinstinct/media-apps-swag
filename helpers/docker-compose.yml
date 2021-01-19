@@ -23,13 +23,13 @@ services:
       - FALLBACKSEARCH=True
       - LIST=both
       - SearchType=both
-      - Concurrency=2
+      - Concurrency=1
       - EMBEDDED_COVER_QUALITY=80
       - FORMAT=FLAC
       - BITRATE=320
       - ENABLEPOSTPROCESSING=true
       - FORCECONVERT=false
-      - requirequality=false
+      - requirequality=true
       - MatchDistance=10
       - replaygain=true
       - FolderPermissions=755
@@ -43,46 +43,12 @@ services:
       - PLEXLIBRARYNAME=Music
       - PLEXURL=http://plex:32400
       - PLEXTOKEN=${PLEX_TOKEN}
-      - POSTPROCESSTHREADS=2
+      - POSTPROCESSTHREADS=4
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/amd:/config
       - ${DOWNLOAD_DIR}/ama:/downloads-amd
     image: randomninjaatk/amd:latest
-
-  # amvd - is a Lidarr companion script to automatically download music videos
-  # Docs: https://github.com/RandomNinjaAtk/docker-amvd
-  amvd:
-    container_name: amvd
-    hostname: amvd
-    restart: unless-stopped
-    networks:
-      media-apps-swag_apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - AUTOSTART=true
-      - SCRIPTINTERVAL=1h
-      - replaygain=true
-      - FolderPermissions=755
-      - FilePermissions=664
-      - MBRATELIMIT=1
-      - LidarrUrl=http://lidarr:8686/lidarr
-      - LidarrAPIkey=${LIDARR_API_KEY}
-      - SOURCE_CONNECTION=lidarr
-      - CountryCode=us
-      - RequireVideoMatch=true
-      - subtitlelanguage=en
-      - videofilter="live"
-      - WriteNFOs=true
-      - USEFOLDERS=true
-      - USEVIDEOFOLDERS=true
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/amvd:/config
-    image: randomninjaatk/amvd:latest
 
 networks:
   media-apps-swag_apps:
