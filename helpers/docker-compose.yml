@@ -21,7 +21,7 @@ services:
       - SCRIPTINTERVAL=1h
       - DOWNLOADMODE=wanted
       - FALLBACKSEARCH=True
-      - LIST=both
+      - LIST=missing
       - SearchType=both
       - Concurrency=1
       - EMBEDDED_COVER_QUALITY=80
