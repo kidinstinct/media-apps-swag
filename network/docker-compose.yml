@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+  #-----------------------------------------------------------------------------
+  # MISC
+  #-----------------------------------------------------------------------------
+
+  # whoami - simple service that returns PC information from where it was accessed.
+  # this is being used to keep apex domain alive
+  whoami:
+    container_name: whoami
+    hostname: whoami
+    networks:
+      apps: {}
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    image: traefik/whoami
+
+networks:
+  apps:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

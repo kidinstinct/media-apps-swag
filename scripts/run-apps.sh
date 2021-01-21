@@ -8,16 +8,36 @@ sudo docker network prune -f
 sudo docker volume prune -f
 
 echo "--------------------------------------------"
-echo "Pulling new images (if any are available)"
+echo "Creating network and inital service to use  "
 echo "--------------------------------------------"
 sleep 2
-sudo docker-compose pull
+cd network && sudo docker-compose pull &&
+  sudo docker-compose up -d --remove-orphans
+cd ..
 
 echo "--------------------------------------------"
-echo "Running (or updating) apps"
+echo "Creating management applications            "
 echo "--------------------------------------------"
 sleep 2
-sudo docker-compose up -d --remove-orphans
+cd management && sudo docker-compose pull &&
+  sudo docker-compose up -d --remove-orphans
+cd ..
+
+echo "--------------------------------------------"
+echo "Creating main applications                  "
+echo "--------------------------------------------"
+sleep 2
+cd main && sudo docker-compose pull &&
+  sudo docker-compose up -d --remove-orphans
+cd ..
+
+echo "--------------------------------------------"
+echo "Creating helper applications                "
+echo "--------------------------------------------"
+sleep 5
+cd helpers && sudo docker-compose pull &&
+  sudo docker-compose up -d --remove-orphans
+cd ..
 
 echo "--------------------------------------------"
 echo "Removing non-used images"

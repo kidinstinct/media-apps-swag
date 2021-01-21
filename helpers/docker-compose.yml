@@ -11,7 +11,7 @@ services:
     hostname: amd
     restart: unless-stopped
     networks:
-      media-apps-swag_apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -57,7 +57,7 @@ services:
     hostname: amvd
     restart: unless-stopped
     networks:
-      media-apps-swag_apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -86,7 +86,7 @@ services:
     image: randomninjaatk/amvd:latest
 
 networks:
-  media-apps-swag_apps:
+  network_apps:
     external: true
 
 secrets:

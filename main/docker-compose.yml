@@ -13,7 +13,7 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      apps: {}
+      network_apps: {}
     ports:
       - 80:80
       - 443:443
@@ -45,7 +45,7 @@ services:
     hostname: organizr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -68,7 +68,7 @@ services:
     hostname: sabnzbd
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -92,7 +92,7 @@ services:
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -125,7 +125,7 @@ services:
     hostname: jackett
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -144,7 +144,7 @@ services:
     hostname: nzbhydra2
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -163,7 +163,7 @@ services:
     hostname: trackarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -182,7 +182,7 @@ services:
     hostname: requestrr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -201,7 +201,7 @@ services:
     hostname: requestrr-4k
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -221,7 +221,7 @@ services:
     hostname: unpackerr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -246,7 +246,7 @@ services:
     hostname: plex
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     ports:
       - 32400:32400/tcp
     environment:
@@ -279,7 +279,7 @@ services:
     hostname: tautulli
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -297,7 +297,7 @@ services:
     hostname: autoscan
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -317,7 +317,7 @@ services:
     hostname: kitana
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
@@ -335,7 +335,7 @@ services:
     hostname: bazarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -354,7 +354,7 @@ services:
     hostname: bazarr-4k
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -373,7 +373,7 @@ services:
     hostname: sonarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -397,7 +397,7 @@ services:
     hostname: sonarr-4k
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -421,7 +421,7 @@ services:
     hostname: radarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -445,7 +445,7 @@ services:
     hostname: radarr-4k
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -469,7 +469,7 @@ services:
     hostname: lidarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -494,7 +494,7 @@ services:
     hostname: readarr
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -522,7 +522,7 @@ services:
     hostname: mylar3
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -548,7 +548,7 @@ services:
     hostname: lazylib
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -574,7 +574,7 @@ services:
     hostname: ombi
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -592,7 +592,7 @@ services:
     hostname: ombi-4k
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -610,7 +610,7 @@ services:
     hostname: calibre
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -631,7 +631,7 @@ services:
     hostname: calibre-web
     restart: unless-stopped
     networks:
-      apps: {}
+      network_apps: {}
     environment:
       - TZ=${TZ}
       - UMASK=022
@@ -644,29 +644,9 @@ services:
       - ${DATA_DIR}:/data
     image: ghcr.io/linuxserver/calibre-web:latest
 
-  #-----------------------------------------------------------------------------
-  # MISC
-  #-----------------------------------------------------------------------------
-
-  # whoami - simple service that returns PC information from where it was accessed.
-  # this is being used to keep apex domain alive
-  whoami:
-    container_name: whoami
-    hostname: whoami
-    networks:
-      apps: {}
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-    image: traefik/whoami
-
 networks:
-  apps:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+  network_apps:
+    external: true
 
 volumes:
   # Temp Volumes
