@@ -33,6 +33,7 @@ embedart:
 
 match:
   strong_rec_thresh: 0.10
-  missing_tracks: strong
-  unmatched_tracks: strong
+  max_rec:
+    missing_tracks: strong
+    unmatched_tracks: strong
   ignored_media: ['Data CD', 'DVD', 'DVD-Video', 'Blu-ray', 'HD-DVD', 'VCD', 'SVCD', 'UMD', 'VHS']
