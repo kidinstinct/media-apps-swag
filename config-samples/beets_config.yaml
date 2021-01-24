@@ -1,0 +1,38 @@
+directory: /data/media/Music
+library: /config/beetslibrary.db
+threaded: yes
+
+import:
+  copy: no
+  log: /config/beet.log
+
+plugins: fetchart lyrics lastgenre embedart duplicates inline scrub
+
+item_fields:
+  singledigitdisc: "'{:01n}'.format(disc)"
+
+paths:
+  default: $albumartist/$album - ALBUM - ($year)/$albumartist - $album - $singledigitdisc - $track - $title
+  comp: $albumartist/$album - ALBUM - ($year)/$albumartist - $album - $singledigitdisc - $track - $title
+  singleton: $albumartist/$album - SINGLE - ($year)/$albumartist - $album - $singledigitdisc - $track - $title
+per_disc_numbering: yes
+
+fanarttv_key: <API KEY>
+fetchart:
+  maxwidth: 1024
+  enforce_ratio: no
+  cautious: yes
+  sources: coverart fanarttv itunes amazon albumart wikipedia
+
+lastgenre:
+  auto: yes
+  source: album
+
+embedart:
+  auto: yes
+
+match:
+  strong_rec_thresh: 0.10
+  missing_tracks: strong
+  unmatched_tracks: strong
+  ignored_media: ['Data CD', 'DVD', 'DVD-Video', 'Blu-ray', 'HD-DVD', 'VCD', 'SVCD', 'UMD', 'VHS']

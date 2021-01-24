@@ -496,6 +496,8 @@ services:
       - PGID=${PGID}
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_DIR}/lidarr/app/90-config:/etc/cont-init.d/90-config
       - ${DOCKER_DIR}/lidarr:/config
       - ${DATA_DIR}:/data
       - ${DOWNLOAD_DIR}:/data/downloads
@@ -505,6 +507,25 @@ services:
       - sabnzbd
       - qbittorrent
     image: ghcr.io/hotio/lidarr:nightly
+
+  # beets - Music tagger
+  # Docs: https://hub.docker.com/r/linuxserver/beets
+  beets:
+    container_name: beets
+    hostname: beets
+    restart: unless-stopped
+    networks:
+      network_apps: {}
+    environment:
+      - TZ=${TZ}
+      - UMASK=022
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DOCKER_DIR}/beets:/config
+      - ${DATA_DIR}:/data
+    image: ghcr.io/linuxserver/beets:nightly
 
   # readarr - eBooks
   # Docs: https://hotio.dev/containers/readarr/
