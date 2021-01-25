@@ -508,25 +508,6 @@ services:
       - qbittorrent
     image: ghcr.io/hotio/lidarr:nightly
 
-  # beets - Music tagger
-  # Docs: https://hub.docker.com/r/linuxserver/beets
-  beets:
-    container_name: beets
-    hostname: beets
-    restart: unless-stopped
-    networks:
-      network_apps: {}
-    environment:
-      - TZ=${TZ}
-      - UMASK=022
-      - PUID=${PUID}
-      - PGID=${PGID}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${DOCKER_DIR}/beets:/config
-      - ${DATA_DIR}:/data
-    image: ghcr.io/linuxserver/beets:nightly
-
   # readarr - eBooks
   # Docs: https://hotio.dev/containers/readarr/
   readarr:
