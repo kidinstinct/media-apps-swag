@@ -2,11 +2,49 @@ directory: /data/media/Music
 library: /config/beetslibrary.db
 threaded: yes
 
+plugins:
+  - fetchart
+  - lyrics
+  - lastgenre
+  - embedart
+  - duplicates
+  - inline
+  - acousticbrainz
+  - lastimport
+  - mbsync
+  - badfiles
+  - scrub
+
 import:
+  art: yes
+  languages: en es it pt
+  write: yes
   copy: no
+  move: no
+  resume: yes
+  incremental: yes
+  quiet_fallback: asis
+  none_rec_action: asis
+  incremental_skip_later: yes
+  detail: no
+  duplicate_action: remove
   log: /config/beet.log
 
-plugins: fetchart lyrics lastgenre embedart duplicates inline scrub
+match:
+  strong_rec_thresh: 0.20
+  max_rec:
+    missing_tracks: strong
+    unmatched_tracks: strong
+  ignored_media:
+    - 'Data CD'
+    - 'DVD'
+    - 'DVD-Video'
+    - 'Blu-ray'
+    - 'HD-DVD'
+    - 'VCD'
+    - 'SVCD'
+    - 'UMD'
+    - 'VHS'
 
 item_fields:
   singledigitdisc: "'{:01n}'.format(disc)"
@@ -17,23 +55,46 @@ paths:
   singleton: $albumartist/$album - SINGLE - ($year)/$albumartist - $album - $singledigitdisc - $track - $title
 per_disc_numbering: yes
 
-fanarttv_key: <API KEY>
+fanarttv_key: <FANART_API_KEY>
 fetchart:
   maxwidth: 1024
   enforce_ratio: no
   cautious: yes
-  sources: coverart fanarttv itunes amazon albumart wikipedia
-
-lastgenre:
-  auto: yes
-  source: album
+  sources:
+    - fanarttv
+    - coverart
+    - filesystem
+    - itunes
+  cover_names:
+    - cover
+    - front
+    - art
+    - album
+    - folder
+    - discart
 
 embedart:
   auto: yes
 
-match:
-  strong_rec_thresh: 0.10
-  max_rec:
-    missing_tracks: strong
-    unmatched_tracks: strong
-  ignored_media: ['Data CD', 'DVD', 'DVD-Video', 'Blu-ray', 'HD-DVD', 'VCD', 'SVCD', 'UMD', 'VHS']
+lyrics:
+  google_API_key: <GOOGLE_CUSTOM_SEARCH_API_KEY>
+
+lastgenre:
+  multiple: yes
+  force: no
+  source: album
+  min_weight: 10
+  auto: yes
+  whitelist: yes
+  separator: ', '
+
+acousticbrainz:
+  auto: yes
+  force: no
+
+lastfm:
+  user: yandyr
+  api_key: <LASTFM_API_KEY>
+
+scrub:
+  auto: yes
