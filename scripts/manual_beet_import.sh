@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+BEET_CONFIG="/config/config.yaml"
+
 # THE MAIN DIRECTORY TO SEARCH FOR IN
 SEARCH_DIR="$1"
 
@@ -10,7 +12,8 @@ shift
 PARAMS="$*"
 
 for i in $PARAMS; do
-  find "$SEARCH_DIR" -maxdepth 1 -iname "$i*" -print0 |
-    xargs -0 docker exec -i beets \
-      beet -c /config/config.yaml import -p -l -i -q
+  # shellcheck disable=SC2016
+  find "$SEARCH_DIR" -mindepth 1 -maxdepth 1 -path "Forfun*" -prune -false -o \
+    -iname "$i*" -print0 | sort -z | xargs -0 -i sh -c "v=\"{}\"; \
+    docker exec -i beets beet -c $BEET_CONFIG import \"\$v\"; date"
 done
