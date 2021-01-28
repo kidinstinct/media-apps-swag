@@ -13,7 +13,7 @@ PARAMS="$*"
 
 for i in $PARAMS; do
   # shellcheck disable=SC2016
-  find "$SEARCH_DIR" -mindepth 1 -maxdepth 1 -path "Forfun*" -prune -false -o \
-    -iname "$i*" -print0 | sort -z | xargs -0 -i sh -c "v=\"{}\"; \
-    docker exec -i beets beet -c $BEET_CONFIG -vv import -q \"\$v\";"
+  find "$SEARCH_DIR" -mindepth 2 -maxdepth 2 \
+    -iname "$i*" -print0 | sort -z | xargs -0 \
+    docker exec -i beets beet -c $BEET_CONFIG -vv import -q
 done
