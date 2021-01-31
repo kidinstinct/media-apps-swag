@@ -15,5 +15,5 @@ for i in $PARAMS; do
   # shellcheck disable=SC2016
   find "$SEARCH_DIR" -mindepth 2 -maxdepth 2 \
     -iname "$i*" -print0 | sort -z | xargs -0 \
-    docker exec -i beets beet -c $BEET_CONFIG -vv import -q
+    docker exec -i beets beet -c $BEET_CONFIG -vv import
 done
