@@ -134,7 +134,7 @@ services:
     depends_on:
       - authredis
       - authmariadb
-    image: authelia/authelia:4.23
+    image: authelia/authelia:latest
 
 networks:
   network_apps:
