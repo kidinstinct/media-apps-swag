@@ -497,7 +497,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${DOCKER_DIR}/lidarr/app/90-config:/etc/cont-init.d/90-config
+      - ${DOCKER_DIR}/lidarr/90-config:/etc/cont-init.d/90-config
       - ${DOCKER_DIR}/lidarr:/config
       - ${DATA_DIR}:/data
       - ${DOWNLOAD_DIR}:/data/downloads
@@ -643,6 +643,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre:/config
       - ${DATA_DIR}:/data
+      - ${DOWNLOAD_DIR}:/data/downloads
     image: ghcr.io/linuxserver/calibre:latest
 
   # calibre-web - web frontend for calibre
