@@ -637,8 +637,7 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - GUAC_USER=${GUAC_USER}
-      - GUAC_PASS=${GUAC_PASS}
+      - PASSWORD=${GUAC_PASS}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/calibre:/config
