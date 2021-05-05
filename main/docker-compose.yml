@@ -521,7 +521,6 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      - calibre
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/readarr:/config
@@ -529,7 +528,6 @@ services:
       - ${DOWNLOAD_DIR}:/data/downloads
       # this is temporary as there was a path restructuring and some errors came up
       # using a docker volume (below) to map an old root directory
-      - books:/Books
     depends_on:
       - nzbhydra2
       - sabnzbd
@@ -668,10 +666,6 @@ services:
 networks:
   network_apps:
     external: true
-
-volumes:
-  # Temp Volumes
-  books:
 
 secrets:
   acme_email:
