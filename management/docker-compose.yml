@@ -45,7 +45,7 @@ services:
       - ${DOCKER_DIR}/unifi:/unifi
       - /var/run/unifi
     command: unifi
-    image: jacobalberty/unifi:latest
+    image: jacobalberty/unifi:6.2
 
   #-----------------------------------------------------------------------------
   # OAUTH and MFA
