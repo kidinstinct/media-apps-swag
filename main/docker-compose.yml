@@ -123,11 +123,12 @@ services:
       - VPN_LAN_NETWORK=172.20.0.0/20
       - VPN_CONF=wg0
       - PRIVOXY_ENABLED=false
+      - FLOOD_AUTH=false
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/data/downloads
-    image: ghcr.io/hotio/qbittorrent
+    image: ghcr.io/hotio/qflood
 
   # nzbhydra2 - usenet and torsnab indexer proxy
   # Docs: https://hotio.dev/containers/nzbhydra2/
