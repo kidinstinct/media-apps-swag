@@ -107,9 +107,11 @@ services:
     container_name: qbittorrent
     hostname: qbittorrent
     restart: unless-stopped
-    privileged: true
+    cap_add:
+      - NET_ADMIN
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1
     networks:
       network_apps: {}
     environment:
@@ -117,24 +119,15 @@ services:
       - UMASK=022
       - PUID=${PUID}
       - PGID=${PGID}
-      # change below subnet to whatever you configure your docker network to
-      - LAN_NETWORK=172.20.0.0/16
-      - WEBUI_PORT=8080
-      - VPN_ENABLED=yes
-      - VPN_PROV=${VPN_PROV}
-      # options below are openvpn or wireguard (I like wireguard)
-      - VPN_CLIENT=wireguard
-      - STRICT_PORT_FORWARD=yes
-      - ENABLE_PRIVOXY=no
-      - DEBUG=no
-      - NAME_SERVERS=209.222.18.222,84.200.69.80,37.235.1.174,1.1.1.1,209.222.18.218,37.235.1.177
-      - VPN_USER=${PIA_USERNAME}
-      - VPN_PASS=${PIA_PASSWORD}
+      - VPN_ENABLED=true
+      - VPN_LAN_NETWORK=172.20.0.0/20
+      - VPN_CONF=wg0
+      - PRIVOXY_ENABLED=false
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/qbittorrent:/config
       - ${DOWNLOAD_DIR}:/data/downloads
-    image: binhex/arch-qbittorrentvpn:latest
+    image: ghcr.io/hotio/qbittorrent
 
   # nzbhydra2 - usenet and torsnab indexer proxy
   # Docs: https://hotio.dev/containers/nzbhydra2/
