@@ -117,7 +117,7 @@ services:
     environment:
       - TZ=${TZ}
       - UMASK=022
-      - PUID=${PUID}ccccccjlceeikhgnevkrfubjcknjfcrfhtvebcfhcjjl
+      - PUID=${PUID}
       - PGID=${PGID}
       - VPN_ENABLED=true
       - VPN_LAN_NETWORK=172.20.0.0/20
