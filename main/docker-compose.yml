@@ -100,7 +100,7 @@ services:
     image: ghcr.io/hotio/nzbget:latest
 
   # qbittorrent - torrent download client with VPN built in
-  # Docs: https://github.com/binhex/arch-qbittorrentvpn
+  # Docs: https://hotio.dev/containers/qflood/
   # Read the documentaton on proper setup of either wireguard or openvpn
   # This template is setup for wireguard
   qbittorrent:
@@ -117,13 +117,14 @@ services:
     environment:
       - TZ=${TZ}
       - UMASK=022
-      - PUID=${PUID}
+      - PUID=${PUID}ccccccjlceeikhgnevkrfubjcknjfcrfhtvebcfhcjjl
       - PGID=${PGID}
       - VPN_ENABLED=true
       - VPN_LAN_NETWORK=172.20.0.0/20
       - VPN_CONF=wg0
       - PRIVOXY_ENABLED=false
       - FLOOD_AUTH=false
+      - FLOOD_OPTION_BASEURI=/qflood
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${DOCKER_DIR}/qbittorrent:/config
