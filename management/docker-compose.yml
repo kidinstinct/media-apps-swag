@@ -136,6 +136,23 @@ services:
       - authmariadb
     image: authelia/authelia:latest
 
+  davinci-postgres:
+    container_name: davinci-postgres
+    hostname: davinci-postgres
+    restart: unless-stopped
+    networks:
+      network_apps: {}
+    ports:
+      - 5432:5432
+    volumes:
+      - ${DOCKER_DIR}/davinci_postgres:/bitnami/postgresql
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - POSTGRESQL_PASSWORD_FILE=/run/secrets/davinci_postgres
+    secrets:
+      - davinci_postgres
+    image: docker.io/bitnami/postgresql:11
+
 networks:
   network_apps:
     external: true
@@ -173,3 +190,5 @@ secrets:
     file: ${DOCKER_DIR}/secrets/authmariadb_root_password
   maxminddb:
     file: ${DOCKER_DIR}/secrets/maxminddb
+  davinci_postgres:
+    file: ${DOCKER_DIR}/secrets/POSTGRESQL_PASSWORD_FILE
