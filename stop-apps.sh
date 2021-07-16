@@ -4,29 +4,25 @@ echo "--------------------------------------------"
 echo "Removing helper applications                "
 echo "--------------------------------------------"
 sleep 2
-cd helpers && sudo docker-compose down --remove-orphans
-cd ..
+(cd helpers && sudo docker-compose down --remove-orphans)
 
 echo "--------------------------------------------"
 echo "Removing management applications            "
 echo "--------------------------------------------"
 sleep 2
-cd management && sudo docker-compose down --remove-orphans
-cd ..
+(cd management && sudo docker-compose down --remove-orphans)
 
 echo "--------------------------------------------"
 echo "Removing main applications                  "
 echo "--------------------------------------------"
 sleep 2
-cd main && sudo docker-compose down --remove-orphans
-cd ..
+(cd main && sudo docker-compose down --remove-orphans)
 
 echo "--------------------------------------------"
 echo "Removing network and inital service to use  "
 echo "--------------------------------------------"
 sleep 2
-cd network && sudo docker-compose down --remove-orphans
-cd ..
+(cd network && sudo docker-compose down --remove-orphans)
 
 echo "--------------------------------------------"
 echo "Clearing unused networks and volumes"
